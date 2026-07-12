@@ -1,0 +1,280 @@
+package com.lidesheng.hyperlyric.root
+
+import com.lidesheng.hyperlyric.lyric.source.SourceManager
+import com.lidesheng.hyperlyric.root.bridge.IpcRouter
+import com.lidesheng.hyperlyric.root.island.SystemUIHookRegistry
+import com.lidesheng.hyperlyric.root.island.renderer.IslandRenderer
+import com.lidesheng.hyperlyric.root.island.renderer.BaseIslandRenderer
+import com.lidesheng.hyperlyric.root.source.LyriconSource
+import com.lidesheng.hyperlyric.root.source.LyricInfoSource
+import com.lidesheng.hyperlyric.root.source.RootLyricSink
+import com.lidesheng.hyperlyric.root.source.SuperLyricSource
+import com.lidesheng.hyperlyric.root.aitrans.AITranslator
+import com.lidesheng.hyperlyric.root.utils.HookLogger
+import com.lidesheng.hyperlyric.common.RootConstants
+import com.lidesheng.hyperlyric.common.UIConstants
+import io.github.libxposed.api.XposedInterface.Chain
+import io.github.libxposed.api.XposedInterface.Hooker
+import io.github.libxposed.api.XposedModule
+import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
+import io.github.libxposed.api.XposedModuleInterface.PackageLoadedParam
+
+class HookEntry : XposedModule() {
+
+    companion object {
+        @Volatile
+        var activeMode = 0
+        val lyriconSource = LyriconSource()
+        val superLyricSource = SuperLyricSource()
+        var lyricInfoSource: LyricInfoSource? = null
+        var sourceManager: SourceManager? = null
+            private set
+
+        @JvmStatic
+        var instance: HookEntry? = null
+            private set
+
+        private val SUPER_ISLAND_RUNTIME_REFRESH_KEYS = setOf(
+            RootConstants.KEY_HOOK_ISLAND_LEFT_ALBUM,
+            RootConstants.KEY_HOOK_ISLAND_RIGHT_ICON,
+            RootConstants.KEY_HOOK_ISLAND_CONTENT_LEFT,
+            RootConstants.KEY_HOOK_ISLAND_CONTENT_RIGHT,
+            RootConstants.KEY_HOOK_ISLAND_LEFT_PADDING_LEFT,
+            RootConstants.KEY_HOOK_ISLAND_LEFT_PADDING_RIGHT,
+            RootConstants.KEY_HOOK_ISLAND_RIGHT_PADDING_LEFT,
+            RootConstants.KEY_HOOK_ISLAND_RIGHT_PADDING_RIGHT,
+            RootConstants.KEY_HOOK_ISLAND_LEFT_CONTENT_MAX_WIDTH,
+            RootConstants.KEY_HOOK_ISLAND_RIGHT_CONTENT_MAX_WIDTH,
+            RootConstants.KEY_HOOK_ISLAND_BEHAVIOR_AFTER_PAUSE,
+            RootConstants.KEY_HOOK_ISLAND_GLOW_EXTRACT_COLOR,
+            RootConstants.KEY_HOOK_TEXT_SIZE,
+            RootConstants.KEY_HOOK_TEXT_SIZE_RATIO,
+            RootConstants.KEY_HOOK_FONT_WEIGHT,
+            RootConstants.KEY_HOOK_FONT_ITALIC,
+            RootConstants.KEY_HOOK_FADING_EDGE_LENGTH,
+            RootConstants.KEY_HOOK_GRADIENT_PROGRESS,
+            RootConstants.KEY_HOOK_CENTER_LYRIC,
+            RootConstants.KEY_HOOK_ANIM_ENABLE,
+            RootConstants.KEY_HOOK_ANIM_ID,
+            RootConstants.KEY_HOOK_MARQUEE_MODE,
+            RootConstants.KEY_HOOK_MARQUEE_SPEED,
+            RootConstants.KEY_HOOK_MARQUEE_DELAY,
+            RootConstants.KEY_HOOK_MARQUEE_LOOP_DELAY,
+            RootConstants.KEY_HOOK_MARQUEE_INFINITE,
+            RootConstants.KEY_HOOK_MARQUEE_STOP_END,
+            RootConstants.KEY_HOOK_MARQUEE_METADATA_MODE,
+            RootConstants.KEY_HOOK_MARQUEE_METADATA_SPEED,
+            RootConstants.KEY_HOOK_MARQUEE_METADATA_DELAY,
+            RootConstants.KEY_HOOK_MARQUEE_METADATA_LOOP_DELAY,
+            RootConstants.KEY_HOOK_MARQUEE_METADATA_INFINITE,
+            RootConstants.KEY_HOOK_SYLLABLE_RELATIVE,
+            RootConstants.KEY_HOOK_SYLLABLE_HIGHLIGHT,
+            RootConstants.KEY_HOOK_DISABLE_TRANSLATION,
+            RootConstants.KEY_HOOK_TRANSLATION_ONLY,
+            RootConstants.KEY_HOOK_SWAP_TRANSLATION,
+            RootConstants.KEY_HOOK_NEXT_LYRIC_LINE,
+            RootConstants.KEY_HOOK_EXTRACT_COVER_TEXT_COLOR,
+            RootConstants.KEY_HOOK_EXTRACT_COVER_TEXT_GRADIENT,
+            RootConstants.KEY_HOOK_CUSTOM_FONT_PATH,
+            RootConstants.KEY_HOOK_WORD_MOTION_ENABLED,
+            RootConstants.KEY_HOOK_WORD_MOTION_CJK_LIFT,
+            RootConstants.KEY_HOOK_WORD_MOTION_CJK_WAVE,
+            RootConstants.KEY_HOOK_WORD_MOTION_LATIN_LIFT,
+            RootConstants.KEY_HOOK_WORD_MOTION_LATIN_WAVE,
+            RootConstants.KEY_HOOK_ENABLE_SUPER_ISLAND
+        )
+    }
+
+    private var _prefs: android.content.SharedPreferences? = null
+    private var prefListener: android.content.SharedPreferences.OnSharedPreferenceChangeListener? = null
+
+    val prefs: android.content.SharedPreferences
+        get() {
+            if (_prefs == null) {
+                _prefs = getRemotePreferences(UIConstants.PREF_NAME)
+            }
+            return _prefs!!
+        }
+
+    override fun onModuleLoaded(param: ModuleLoadedParam) {
+        super.onModuleLoaded(param)
+        instance = this
+        HookLogger.module = this
+        HookLogger.i("HookEntry","模块已加载")
+    }
+
+    override fun onPackageLoaded(param: PackageLoadedParam) {
+        val processName = runCatching { android.app.Application.getProcessName() }.getOrNull() ?: ""
+        
+        // 仅在主进程注入
+        if (processName.contains(":")) return
+        
+        val packageName = param.packageName
+        
+        if (packageName == "com.android.systemui") {
+            try {
+                UnlockIslandWhitelist.hook(this, param.defaultClassLoader)
+            } catch (e: Exception) {
+                 if (e is ClassNotFoundException || e is NoSuchMethodException) {
+                     HookLogger.w("HookEntry","此系统版本不支持超级岛下拉小窗白名单")
+                 } else {
+                     HookLogger.e("HookEntry", "超级岛下拉小窗白名单注入失败", e)
+                 }
+            }
+            try {
+                UnlockFocusWhitelist.hook(this, param.defaultClassLoader)
+            } catch (e: Exception) {
+                 if (e is ClassNotFoundException || e is NoSuchMethodException) {
+                     HookLogger.w("HookEntry","此系统版本不支持解锁焦点通知白名单")
+                 } else {
+                     HookLogger.e("HookEntry", "焦点通知白名单注入失败", e)
+                 }
+            }
+
+            val isSuperIslandEnabled = prefs.getBoolean(RootConstants.KEY_HOOK_ENABLE_SUPER_ISLAND, RootConstants.DEFAULT_HOOK_ENABLE_SUPER_ISLAND)
+            
+            if (!isSuperIslandEnabled) {
+                HookLogger.i("HookEntry","已在设置中禁用超级岛歌词功能")
+            }
+
+            activeMode = prefs.getInt(RootConstants.KEY_HOOK_LYRIC_MODE, RootConstants.DEFAULT_HOOK_LYRIC_MODE)
+            HookLogger.i("HookEntry","超级岛激活模式 = $activeMode")
+
+            // 劫持 Application.onCreate 以初始化 Lyricon Receiver 所需的环境
+            try {
+                val appClass = param.defaultClassLoader.loadClass("android.app.Application")
+                val onCreateMethod = appClass.getDeclaredMethod("onCreate")
+                deoptimize(onCreateMethod)
+                hook(onCreateMethod).intercept(AppCreateHooker())
+                HookLogger.i("HookEntry","系统环境注入成功 (Application.onCreate)")
+            } catch (e: Exception) {
+                if (e is ClassNotFoundException || e is NoSuchMethodException) {
+                    HookLogger.w("HookEntry","未找到 Application.onCreate，无法注入环境")
+                } else {
+                    HookLogger.e("HookEntry", "注入 Application.onCreate 时发生错误", e)
+                }
+            }
+
+            // 核心：拦截 ClassLoader 构造，以捕捉 miui.systemui.plugin 等动态加载的插件
+            try {
+                val clClass = Class.forName("dalvik.system.BaseDexClassLoader")
+                for (constructor in clClass.declaredConstructors) {
+                    deoptimize(constructor)
+                    hook(constructor).intercept(ClassLoaderHooker())
+                }
+                HookLogger.i("HookEntry","插件拦截器已就绪 (ClassLoader)")
+            } catch (e: Exception) {
+                if (e is ClassNotFoundException || e is NoSuchMethodException) {
+                    HookLogger.w("HookEntry","未找到 ClassLoader 构造方法")
+                } else {
+                    HookLogger.e("HookEntry", "拦截 ClassLoader 时发生错误", e)
+                }
+            }
+
+        } else if (packageName == "miui.systemui.plugin") {
+            SystemUIHookRegistry.hook(this, param.defaultClassLoader)
+        }
+    }
+
+    /**
+     * 动态类加载器劫持
+     */
+    inner class ClassLoaderHooker : Hooker {
+        override fun intercept(chain: Chain): Any? {
+            val result = chain.proceed()
+            val cl = chain.thisObject as? ClassLoader ?: return result
+            try {
+                SystemUIHookRegistry.hook(this@HookEntry, cl)
+            } catch (e: Exception) {
+                if (e is ClassNotFoundException || e is NoSuchMethodException) {
+                    // HookLogger.w("HookEntry","插件中未找到超级岛相关类")
+                } else {
+                    HookLogger.e("HookEntry", "动态注入超级岛插件失败", e)
+                }
+            }
+            return result
+        }
+    }
+
+    /**
+     * Application 生命周期劫持
+     */
+    class AppCreateHooker : Hooker {
+        override fun intercept(chain: Chain): Any? {
+            val app = chain.thisObject as? android.app.Application
+            if (app != null) {
+                try {
+                    val entry = instance!!
+                    val renderer = BaseIslandRenderer
+                    val sink = RootLyricSink(renderer, entry.prefs)
+
+                    IpcRouter.initialize(app)
+
+                    lyriconSource.initialize(app)
+                    superLyricSource.initialize(app)
+                    lyricInfoSource = LyricInfoSource(app)
+
+                    AITranslator.init(app)
+
+                    sourceManager = SourceManager(
+                        sources = listOf(lyriconSource, superLyricSource, lyricInfoSource!!),
+                        prefs = entry.prefs,
+                        sink = sink,
+                        prefKey = RootConstants.KEY_HOOK_LYRIC_SOURCE,
+                        defaultSourceId = RootConstants.DEFAULT_HOOK_LYRIC_SOURCE,
+                        stateResetter = LyriconDataBridge,
+                        logger = HookLogger
+                    )
+                    sourceManager?.start()
+
+                    entry.prefListener?.let {
+                        entry.prefs.unregisterOnSharedPreferenceChangeListener(it)
+                    }
+                    entry.prefListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                        when (key) {
+                            RootConstants.KEY_HOOK_LYRIC_SOURCE -> {
+                                val newSourceId = entry.prefs.getString(key, RootConstants.DEFAULT_HOOK_LYRIC_SOURCE) ?: RootConstants.DEFAULT_HOOK_LYRIC_SOURCE
+                                HookLogger.i("HookEntry", "歌词源切换: $newSourceId")
+                                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                                    sourceManager?.switchSource(newSourceId)
+                                }
+                            }
+                            RootConstants.KEY_HOOK_LYRIC_MODE -> {
+                                val newMode = entry.prefs.getInt(key, RootConstants.DEFAULT_HOOK_LYRIC_MODE)
+                                if (newMode == activeMode) return@OnSharedPreferenceChangeListener
+                                HookLogger.i("HookEntry", "歌词模式切换: $newMode")
+                                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                                    activeMode = newMode
+                                    BaseIslandRenderer.refreshActiveIsland()
+                                }
+                            }
+                            RootConstants.KEY_HOOK_ENABLE_SUPER_ISLAND -> {
+                                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                                    if (entry.prefs.getBoolean(key, RootConstants.DEFAULT_HOOK_ENABLE_SUPER_ISLAND)) {
+                                        BaseIslandRenderer.refreshActiveIsland()
+                                    } else {
+                                        BaseIslandRenderer.clearAllViews()
+                                    }
+                                }
+                            }
+                            in SUPER_ISLAND_RUNTIME_REFRESH_KEYS -> {
+                                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                                    BaseIslandRenderer.refreshActiveIsland()
+                                }
+                            }
+                        }
+                    }
+                    entry.prefListener?.let {
+                        entry.prefs.registerOnSharedPreferenceChangeListener(it)
+                    }
+
+                    HookLogger.i("HookEntry", "歌词源 = ${sourceManager?.getActiveSource()?.displayName}")
+                    HookLogger.i("HookEntry", "系统环境初始化完成")
+                } catch (e: Exception) {
+                    HookLogger.e("HookEntry", "系统环境初始化失败", e)
+                }
+            }
+            return chain.proceed()
+        }
+    }
+}

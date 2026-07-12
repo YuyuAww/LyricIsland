@@ -1,0 +1,161 @@
+package com.lidesheng.hyperlyric.common.media
+
+import android.content.Context
+import android.graphics.Bitmap
+import android.media.MediaMetadata
+import android.media.session.MediaController
+import android.media.session.MediaSessionManager
+import android.media.session.PlaybackState
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
+import com.lidesheng.hyperlyric.common.HyperLogger
+
+/**
+ * 媒体元数据辅助类。
+ * 负责从 MediaSession 中提取歌曲信息及封面图片，提供多级兜底逻辑。
+ */
+object MediaMetadataHelper {
+
+    private val sessionLock = Any()
+    private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
+
+    @Volatile
+    private var mediaSessionManager: MediaSessionManager? = null
+
+    @Volatile
+    private var activeControllers: List<MediaController> = emptyList()
+
+    private val activeSessionsListener = MediaSessionManager.OnActiveSessionsChangedListener { controllers ->
+        activeControllers = controllers.orEmpty()
+    }
+
+    data class MediaInfo(
+        val title: String = "",
+        val artist: String = "",
+        val album: String = "",
+        val albumArt: Bitmap? = null
+    )
+
+    /**
+     * 获取指定包名的当前媒体信息
+     */
+    fun getMediaInfo(context: Context, packageName: String, logger: HyperLogger? = null): MediaInfo {
+        if (packageName.isEmpty()) return MediaInfo()
+
+        return try {
+            findController(context, packageName)?.metadata?.toMediaInfo() ?: MediaInfo()
+        } catch (e: Exception) {
+            logger?.e("MediaMetadataHelper", "获取媒体信息失败 ($packageName)", e)
+            MediaInfo()
+        }
+    }
+
+    /**
+     * 获取指定包名的当前播放位置（毫秒）。未播放或无控制器时返回 -1。
+     */
+    fun getPlaybackPosition(context: Context, packageName: String): Long {
+        if (packageName.isEmpty()) return -1
+        return try {
+            estimatePlaybackPosition(findController(context, packageName)?.playbackState)
+        } catch (_: Exception) {
+            -1
+        }
+    }
+
+    /**
+     * 通过系统 MediaSession 判断指定包名是否正在播放。
+     */
+    fun isPackagePlaying(context: Context, packageName: String): Boolean {
+        if (packageName.isEmpty()) return false
+        return try {
+            ensureSessionSnapshot(context)
+            activeControllers.any {
+                it.packageName == packageName && it.playbackState?.state == PlaybackState.STATE_PLAYING
+            }
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    fun estimatePlaybackPosition(state: PlaybackState?): Long {
+        state ?: return -1L
+        val basePosition = state.position
+        if (basePosition < 0L) return -1L
+        if (state.state != PlaybackState.STATE_PLAYING || state.lastPositionUpdateTime <= 0L) {
+            return basePosition
+        }
+        val elapsed = (SystemClock.elapsedRealtime() - state.lastPositionUpdateTime).coerceAtLeast(0L)
+        return (basePosition + elapsed * state.playbackSpeed).toLong().coerceAtLeast(0L)
+    }
+
+    private fun findController(context: Context, packageName: String): MediaController? {
+        return selectController(findControllers(context, packageName))
+    }
+
+    private fun findControllers(context: Context, packageName: String): List<MediaController> {
+        ensureSessionSnapshot(context)
+        val matches = activeControllers.filter { it.packageName == packageName }
+        if (matches.isNotEmpty()) return matches
+        return run {
+            refreshSessionSnapshot()
+            activeControllers.filter { it.packageName == packageName }
+        }
+    }
+
+    private fun selectController(controllers: List<MediaController>): MediaController? {
+        return controllers.firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
+            ?: controllers.maxByOrNull { it.playbackState?.lastPositionUpdateTime ?: 0L }
+    }
+
+    private fun ensureSessionSnapshot(context: Context) {
+        if (mediaSessionManager != null) return
+        synchronized(sessionLock) {
+            if (mediaSessionManager != null) return
+            val manager = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
+            mediaSessionManager = manager
+            activeControllers = runCatching { manager.getActiveSessions(null) }.getOrDefault(emptyList())
+            val registerListener: () -> Unit = {
+                runCatching {
+                    manager.addOnActiveSessionsChangedListener(activeSessionsListener, null)
+                }
+                Unit
+            }
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                registerListener()
+            } else {
+                mainHandler.post(registerListener)
+            }
+        }
+    }
+
+    private fun refreshSessionSnapshot() {
+        val manager = mediaSessionManager ?: return
+        activeControllers = runCatching { manager.getActiveSessions(null) }.getOrDefault(activeControllers)
+    }
+
+    /**
+     * 扩展方法：多级兜底提取封面
+     * 优先级：ALBUM_ART > ART > DISPLAY_ICON
+     */
+    private fun MediaMetadata.extractAlbumArt(): Bitmap? {
+        return try {
+            getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
+                ?: getBitmap(MediaMetadata.METADATA_KEY_ART)
+                ?: getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun MediaMetadata.toMediaInfo(): MediaInfo {
+        val mediaDescription = description
+        return MediaInfo(
+            title = mediaDescription.title?.toString().orEmpty(),
+            artist = mediaDescription.subtitle?.toString().orEmpty(),
+            album = mediaDescription.description?.toString().orEmpty(),
+            albumArt = extractAlbumArt()
+        )
+    }
+
+}
