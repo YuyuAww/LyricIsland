@@ -8,4 +8,7 @@ interface LyricSink {
     fun onMetadata(title: String?, artist: String?, album: String?, publisher: String? = null)
     fun onPlaybackStateChanged(isPlaying: Boolean)
     fun onPositionChanged(position: Long)
+    fun onSeekTo(position: Long)
+    fun onDisplayTranslationChanged(isDisplayTranslation: Boolean)
+    fun onDisplayRomaChanged(isDisplayRoma: Boolean)
 }
