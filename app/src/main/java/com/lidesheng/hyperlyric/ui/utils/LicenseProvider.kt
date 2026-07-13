@@ -16,9 +16,7 @@ object LicenseProvider {
             LicenseItem("KernelSU", "tiann", "https://github.com/tiann/KernelSU"),
             LicenseItem("AndroidAnimations", "daimajia", "https://github.com/daimajia/AndroidAnimations"),
             LicenseItem("HiddenApiBypass", "LSPosed", "https://github.com/LSPosed/AndroidHiddenApiBypass"),
-            LicenseItem("OpenAI", "OpenAI", "https://openai.com"),
             LicenseItem("Kotlin Coroutines", "Kotlin", "https://github.com/Kotlin/kotlinx.coroutines"),
-            LicenseItem("Shizuku", "RikkaApps", "https://github.com/RikkaApps/Shizuku"),
             LicenseItem("Capsulyric", "FrancoGiudans", "https://github.com/FrancoGiudans/Capsulyric"),
             LicenseItem("InstallerX-Revived", "wxxsfxyzm", "https://github.com/wxxsfxyzm/InstallerX-Revived")
         )

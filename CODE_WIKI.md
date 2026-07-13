@@ -8,12 +8,10 @@
   - [3.1 common 公共模块](#31-common-公共模块)
   - [3.2 lyric 歌词模块](#32-lyric-歌词模块)
   - [3.3 root Hook 模块](#33-root-hook-模块)
-  - [3.4 service 服务模块](#34-service-服务模块)
-  - [3.5 ui 界面模块](#35-ui-界面模块)
+  - [3.4 ui 界面模块](#34-ui-界面模块)
 - [4. 核心功能详解](#4-核心功能详解)
   - [4.1 歌词源管理](#41-歌词源管理)
   - [4.2 超级岛歌词注入](#42-超级岛歌词注入)
-  - [4.3 通知歌词展示](#43-通知歌词展示)
 - [5. 关键数据结构](#5-关键数据结构)
 - [6. 依赖关系](#6-依赖关系)
 - [7. 项目构建与运行](#7-项目构建与运行)
@@ -28,7 +26,6 @@
 
 **核心功能**:
 - 通过 Xposed Hook 方式在 MIUI 超级岛（灵动岛）中显示歌词
-- 通过通知方式显示歌词（焦点通知/普通通知）
 - 使用 Lyricon 歌词源获取实时歌词
 - 丰富的样式自定义选项
 
@@ -36,7 +33,6 @@
 - 语言: Kotlin
 - UI 框架: Jetpack Compose + MIUI X 组件库
 - Hook 框架: LibXposed
-- 权限框架: Shizuku
 - 序列化: Kotlinx Serialization
 - 协程: Kotlin Coroutines
 
@@ -53,13 +49,8 @@
 └────────────────────────────┬────────────────────────────────┘
                              │
 ┌────────────────────────────▼────────────────────────────────┐
-│                      服务层 (service)                        │
-│  LiveLyricService / NotificationPresenter / MetadataSource  │
-└────────────────────────────┬────────────────────────────────┘
-                             │
-┌────────────────────────────▼────────────────────────────────┐
 │                      歌词核心层 (lyric)                      │
-│  数据模型 / SourceManager / ConfigRepository / DynamicData  │
+│  数据模型 / SourceManager / DynamicData                     │
 └────────────────────────────┬────────────────────────────────┘
                              │
           ┌──────────────────┴──────────────────┐
@@ -69,6 +60,7 @@
 │  (Xposed 模块)    │               │   工具类/常量/解析器     │
 │  HookEntry        │               └─────────────────────────┘
 │  IslandHooker     │
+│  LyriconSource    │
 └───────────────────┘
 ```
 
@@ -92,10 +84,6 @@ com.lidesheng.hyperlyric
 │   ├── island/                # 超级岛注入
 │   ├── source/                # Root 进程歌词源（LyriconSource）
 │   └── utils/                 # Hook 工具
-├── service/                   # 前台服务
-│   ├── scheduler/             # 调度器
-│   ├── source/                # 服务端歌词源
-│   └── utils/                 # 通知构建等
 ├── ui/                        # 用户界面
 │   ├── component/             # Compose 组件
 │   ├── navigation/            # 导航
@@ -116,8 +104,7 @@ com.lidesheng.hyperlyric
 
 | 类名 | 职责 |
 |------|------|
-| [RootConstants.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/RootConstants.kt) | Root Hook 相关的配置键名与默认值，包括超级岛、样式、动画、翻译等配置 |
-| [ServiceConstants.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/ServiceConstants.kt) | 服务层相关配置键名与默认值，包括通知类型、白名单等 |
+| [RootConstants.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/RootConstants.kt) | Root Hook 相关的配置键名与默认值，包括超级岛、样式、动画、翻译、白名单解锁等配置 |
 | [PreferenceKeys.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/PreferenceKeys.kt) | SharedPreferences 名称与日志级别配置 |
 | [UIConstants.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/UIConstants.kt) | UI 相关常量 |
 
@@ -132,9 +119,9 @@ com.lidesheng.hyperlyric
 
 | 类名 | 职责 |
 |------|------|
-| [LrcParser.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/lyric/LrcParser.kt) | LRC 格式歌词解析器，支持标准时间标签解析 |
+| [LrcParser.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/lyric/LrcParser.kt) | LRC 格式歌词解析器 |
 | [LyricInfoParser.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/lyric/LyricInfoParser.kt) | 歌词信息解析器 |
-| [LyricSplitter.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/lyric/LyricSplitter.kt) | 歌词文本分割器，用于左右岛/通知布局分割 |
+| [LyricSplitter.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/lyric/LyricSplitter.kt) | 歌词文本分割器，用于左右岛布局分割 |
 | [RichLyricLineSplitter.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/lyric/RichLyricLineSplitter.kt) | 富文本歌词行分割器 |
 
 #### 3.1.4 媒体与图片工具
@@ -175,7 +162,6 @@ com.lidesheng.hyperlyric
 | 类名 | 职责 |
 |------|------|
 | [DynamicLyricData.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/DynamicLyricData.kt) | 全局歌词状态容器，使用 StateFlow 驱动 UI 更新 |
-| [ConfigRepository.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/ConfigRepository.kt) | 配置仓库，管理通知白名单等 |
 
 #### 3.2.4 LyricState 数据结构
 
@@ -275,86 +261,17 @@ UpdateBigIslandViewHook
 | [UnlockFocusWhitelist.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/UnlockFocusWhitelist.kt) | 解锁焦点通知白名单 |
 | [UnlockIslandWhitelist.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/UnlockIslandWhitelist.kt) | 解锁超级岛白名单 |
 
-### 3.4 service 服务模块
-
-**路径**: [app/src/main/java/com/lidesheng/hyperlyric/service](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service)
-
-#### 3.4.1 核心服务
-
-| 类名 | 职责 |
-|------|------|
-| [LiveLyricService.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/LiveLyricService.kt) | 歌词监听服务，继承 NotificationListenerService |
-| [LyricTileService.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/LyricTileService.kt) | 快捷设置磁贴服务 |
-| [NotificationPresenter.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/NotificationPresenter.kt) | 通知展示调度中心 |
-
-**LiveLyricService 工作流程**:
-
-1. **onCreate**: 初始化组件
-   - 创建文本画笔和歌词分割器
-   - 初始化 NotificationPresenter
-   - 初始化白名单配置
-   - 创建 MetadataSource（从通知中提取媒体信息）
-   - 创建 AppLyricSink（处理歌词更新）
-   - 收集状态流并驱动通知更新
-
-2. **onListenerConnected**: 通知监听服务连接成功
-3. **onDestroy**: 清理资源
-
-#### 3.4.2 服务端歌词源 (source)
-
-| 类名 | 职责 |
-|------|------|
-| [ServiceLyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/ServiceLyricSource.kt) | 服务端歌词源接口 |
-| [AutoLyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/AutoLyricSource.kt) | 自动歌词源（优先 LyricInfo，回退 LRC） |
-| [LyricInfoLyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/LyricInfoLyricSource.kt) | 歌词信息源 |
-| [MetadataLrcLyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/MetadataLrcLyricSource.kt) | 元数据 LRC 歌词源 |
-| [MetadataSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/MetadataSource.kt) | 元数据源，从通知提取媒体信息 |
-| [AppLyricSink.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/AppLyricSink.kt) | App 进程歌词接收器 |
-| [SyncData.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/SyncData.kt) | 同步数据模型 |
-
-#### 3.4.3 通知工具 (utils)
-
-| 类名 | 职责 |
-|------|------|
-| [NotificationBuilder.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/utils/NotificationBuilder.kt) | 通知构建器，支持普通通知和焦点通知 |
-| [FocusNotificationBuilder.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/utils/FocusNotificationBuilder.kt) | 焦点通知构建器 |
-
-**NotificationPresenter 通知调度逻辑**:
-
-```
-updateState(globalState, force)
-    ↓
-检查白名单 → 不在白名单则清除通知
-    ↓
-检查灵动岛开关 → 关闭则清除通知
-    ↓
-计算当前播放进度
-    ↓
-构建 UiState
-    ↓
-状态去重检查
-    ↓
-屏幕状态检查（息屏降频）
-    ↓
-播放状态防抖（暂停 150ms 后清除）
-    ↓
-dispatchNotifications
-    ├── 普通通知模式
-    └── 焦点通知模式
-        └── 可选: Shizuku 闪断 XMSF 联网绕过限制
-```
-
-### 3.5 ui 界面模块
+### 3.4 ui 界面模块
 
 **路径**: [app/src/main/java/com/lidesheng/hyperlyric/ui](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui)
 
-#### 3.5.1 主入口
+#### 3.4.1 主入口
 
 | 类名 | 职责 |
 |------|------|
 | [MainActivity.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/MainActivity.kt) | 主 Activity，Jetpack Compose 入口 |
 
-#### 3.5.2 导航 (navigation)
+#### 3.4.2 导航 (navigation)
 
 | 类名 | 职责 |
 |------|------|
@@ -362,7 +279,7 @@ dispatchNotifications
 | [Navigator.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/navigation/Navigator.kt) | 导航器封装 |
 | [Route.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/navigation/Route.kt) | 路由定义（sealed class） |
 
-#### 3.5.3 页面 (page)
+#### 3.4.3 页面 (page)
 
 | 页面 | 职责 |
 |------|------|
@@ -370,7 +287,6 @@ dispatchNotifications
 | [SetupPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/SetupPage.kt) | 引导设置页 |
 | [HookSettingsPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/HookSettingsPage.kt) | Hook 模块设置页 |
 | [LyricSettingsPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/hooksettings/LyricSettingsPage.kt) | 歌词设置页 |
-| [DynamicIslandNotificationPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/DynamicIslandNotificationPage.kt) | 灵动岛通知设置页 |
 | [LogPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/LogPage.kt) | 日志查看页 |
 | [HelpPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/HelpPage.kt) | 帮助页 |
 | [ChangelogPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/ChangelogPage.kt) | 更新日志页 |
@@ -388,19 +304,16 @@ dispatchNotifications
 系统采用**源-接收器**模式（Source-Sink Pattern）：
 
 ```
-LyricSource (提供者) → LyricSink (消费者)
-      ↑                       ↑
-      │                       │
-  SourceManager          RootLyricSink / AppLyricSink
-  (管理)                (渲染/通知)
+LyriconSource (提供者) → RootLyricSink (消费者)
+         ↑                      ↑
+         │                      │
+    SourceManager           渲染器
+    (管理)               (超级岛显示)
 ```
 
-#### 4.1.2 两套歌词源体系
+#### 4.1.2 Root 体系
 
-| 体系 | 运行进程 | 用途 | 歌词源 |
-|------|---------|------|--------|
-| Root 体系 | SystemUI 进程 | 超级岛歌词显示 | LyriconSource |
-| Service 体系 | App 进程 | 通知歌词显示 | AutoLyricSource (LyricInfo + LRC) |
+项目仅使用 Root 体系（SystemUI 进程）进行超级岛歌词显示，唯一歌词源为 LyriconSource。
 
 ### 4.2 超级岛歌词注入
 
@@ -429,40 +342,6 @@ IslandLyricTextInjector.injectSlots()  注入歌词槽位
 IslandLyricTextInjector.refreshCurrentContent()  刷新歌词内容
     ↓
 IslandHostFacade.injectHostGlow()  注入光晕效果
-```
-
-### 4.3 通知歌词展示
-
-#### 4.3.1 两种通知模式
-
-| 模式 | 说明 | 通知 ID |
-|------|------|---------|
-| 普通通知 | 标准通知栏歌词显示 | NORMAL_NOTIFICATION_ID |
-| 焦点通知 | MIUI 焦点通知（更醒目） | FOCUS_NOTIFICATION_ID |
-
-#### 4.3.2 通知内容结构
-
-- **左侧**: 专辑封面 / 音乐图标
-- **右侧上半**: 当前歌词（或歌曲名）
-- **右侧下半**: 歌曲信息（歌名 - 歌手）
-- **进度条**: 播放进度（可选）
-
-#### 4.3.3 性能优化
-
-1. **状态去重**: 相同状态不重复发送通知
-2. **仅进度变化过滤**: 息屏或关闭进度条时不触发
-3. **息屏降频**: 屏幕关闭时减少更新频率
-4. **暂停防抖**: 暂停 150ms 后才清除通知
-
-#### 4.3.4 焦点通知绕过限制
-
-通过 Shizuku 临时禁用 XMSF 联网，绕过焦点通知的数量限制：
-
-```
-1. 闪断 XMSF 联网 (ShizukuManager.setXmsfNetworkingEnabled(false))
-2. 发射焦点通知
-3. 等待 100ms 盲区
-4. 恢复网络
 ```
 
 ---
@@ -551,7 +430,6 @@ IslandHostFacade.injectHostGlow()  注入光晕效果
 | Navigation3 | 1.1.0 | 导航组件 |
 | Palette KTX | 1.0.0 | 颜色提取 |
 | HiddenApiBypass | 4.3 | 隐藏 API 绕过 |
-| Shizuku API | 13.1.5 | Shizuku 权限框架 |
 | LibXposed API/Service | 101.0.0 | Xposed 框架 |
 | Lyricon Subscriber | 0.1.70 | Lyricon 歌词 SDK |
 | Kotlinx Serialization | 1.6.3 | JSON 序列化 |
@@ -564,7 +442,7 @@ IslandHostFacade.injectHostGlow()  注入光晕效果
 ### 6.2 模块间依赖关系
 
 ```
-ui → service → lyric → common
+ui → lyric → common
               ↓
             root (Xposed 模块，独立进程)
 ```
@@ -575,8 +453,6 @@ ui → service → lyric → common
 
 | 接口 | 用途 |
 |------|------|
-| IPrivilegedService.aidl | 特权服务接口 |
-| IPrivilegedLogCallback.aidl | 特权日志回调 |
 | IBridgeCallback.aidl | 桥接回调 |
 | Song.aidl | 歌曲数据 AIDL |
 
@@ -607,9 +483,8 @@ ui → service → lyric → common
 
 1. **安装 APK**: 安装构建生成的 APK
 2. **激活 Xposed 模块**: 在 LSPosed 等框架中激活 HyperLyric，作用域为系统界面（SystemUI）
-3. **通知权限**: 授予通知监听权限
-4. **配置应用**: 打开 App 进行各项配置
-5. **重启 SystemUI**: 重启系统界面以激活 Hook
+3. **配置应用**: 打开 App 进行各项配置
+4. **重启 SystemUI**: 重启系统界面以激活 Hook
 
 ### 7.4 Xposed 模块配置
 
@@ -643,5 +518,5 @@ App 进程与 Xposed（SystemUI）进程通过以下机制同步配置：
 
 ---
 
-*文档版本: 3.0 (Lyricon Only)*  
+*文档版本: 4.0 (Super Island Only)*  
 *生成日期: 2026-07-13*

@@ -16,7 +16,6 @@ import com.lidesheng.hyperlyric.utils.LogManager
  * 专辑图片与色彩处理中心。
  *
  * 负责所有 Bitmap 裁剪、圆角处理和从封面提取强调色的逻辑。
- * LiveLyricService 仅在对应开关打开时才调用此处的方法，
  */
 object AlbumImageHelper {
 

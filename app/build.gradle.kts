@@ -63,10 +63,6 @@ dependencies {
     implementation(libs.androidx.palette.ktx)
     implementation(libs.hiddenapibypass)
 
-    // Shizuku
-    implementation(libs.shizuku.api)
-    implementation(libs.shizuku.provider)
-
     // libxposed API
     compileOnly(libs.libxposed.api)
     implementation(libs.libxposed.service)
