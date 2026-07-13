@@ -3,7 +3,6 @@ package com.lidesheng.hyperlyric.service.source
 import android.content.Context
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.toColorInt
-import com.lidesheng.hyperlyric.BuildConfig
 import com.lidesheng.hyperlyric.common.image.AlbumImageHelper
 import com.lidesheng.hyperlyric.lyric.ConfigRepository
 import com.lidesheng.hyperlyric.lyric.DynamicLyricData
@@ -166,7 +165,7 @@ class AppLyricSink(
 
         val lyricSource = sp.getInt(ServiceConstants.KEY_SERVICE_LYRIC_SOURCE, ServiceConstants.DEFAULT_SERVICE_LYRIC_SOURCE)
 
-        // 2. 本地元数据与在线歌词获取和解析（如果在歌曲生命周期中延迟到达或需要重新解析）
+        // 2. 本地元数据歌词获取和解析（如果在歌曲生命周期中延迟到达或需要重新解析）
         val source = sourceManager.getSource(lyricSource)
         val currentRawLyric = when (lyricSource) {
             ServiceConstants.LYRIC_SOURCE_AUTO -> data.lyricInfoRaw ?: data.lyricRaw
@@ -182,16 +181,7 @@ class AppLyricSink(
         if (needFetchLyrics && lyricSource != ServiceConstants.LYRIC_SOURCE_TITLE) {
             fetchJob?.cancel()
             fetchJob = scope.launch(Dispatchers.IO) {
-                val isOnline = lyricSource == ServiceConstants.LYRIC_SOURCE_ONLINE
-                if (isOnline) {
-                    DynamicLyricData.updateFetchingLyrics(true)
-                }
-
                 val rawLines = source.getLyrics(data)
-
-                if (isOnline) {
-                    DynamicLyricData.updateFetchingLyrics(false)
-                }
 
                 if (currentSongIdentifier == data.identifier) {
                     if (!rawLines.isNullOrEmpty()) {

@@ -15,11 +15,9 @@
   - [4.2 超级岛歌词注入](#42-超级岛歌词注入)
   - [4.3 通知歌词展示](#43-通知歌词展示)
   - [4.4 AI 歌词翻译](#44-ai-歌词翻译)
-  - [4.5 在线歌词搜索](#45-在线歌词搜索)
 - [5. 关键数据结构](#5-关键数据结构)
 - [6. 依赖关系](#6-依赖关系)
 - [7. 项目构建与运行](#7-项目构建与运行)
-- [8. 产品 Flavor](#8-产品-flavor)
 
 ---
 
@@ -32,7 +30,7 @@
 **核心功能**:
 - 通过 Xposed Hook 方式在 MIUI 超级岛（灵动岛）中显示歌词
 - 通过通知方式显示歌词（焦点通知/普通通知）
-- 支持多种歌词源（Lyricon、SuperLyric、在线歌词等）
+- 支持多种歌词源（Lyricon、SuperLyric、LyricInfo、LRC 元数据等）
 - AI 歌词翻译功能
 - 丰富的样式自定义选项
 
@@ -41,7 +39,6 @@
 - UI 框架: Jetpack Compose + MIUI X 组件库
 - Hook 框架: LibXposed
 - 权限框架: Shizuku
-- 网络请求: Retrofit + OkHttp
 - 序列化: Kotlinx Serialization
 - 协程: Kotlin Coroutines
 
@@ -166,6 +163,7 @@ com.lidesheng.hyperlyric
 | [LyricWord.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/model/LyricWord.kt) | 歌词单词模型，支持逐字歌词 |
 | [LyricMetadata.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/model/LyricMetadata.kt) | 歌词元数据（翻译、音译等） |
 | [LyricTiming.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/model/LyricTiming.kt) | 歌词时间信息 |
+| [LyricModels.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/LyricModels.kt) | LrcLine 数据类定义 |
 
 #### 3.2.2 歌词源管理 (source)
 
@@ -187,7 +185,6 @@ com.lidesheng.hyperlyric
 |------|------|
 | [DynamicLyricData.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/DynamicLyricData.kt) | 全局歌词状态容器，使用 StateFlow 驱动 UI 更新 |
 | [ConfigRepository.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/ConfigRepository.kt) | 配置仓库，管理通知白名单等 |
-| [LyricProviderFactory.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/LyricProviderFactory.kt) | 歌词提供者工厂，根据 flavor 创建不同实现 |
 
 #### 3.2.4 LyricState 数据结构
 
@@ -282,7 +279,7 @@ UpdateBigIslandViewHook
 | [AITranslationScheduler.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/AITranslationScheduler.kt) | 翻译调度器，管理并发与队列 |
 | [AITranslationCache.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/AITranslationCache.kt) | 翻译缓存（内存+SQLite） |
 | [AITranslationKey.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/AITranslationKey.kt) | 翻译缓存键生成 |
-| [OpenAiTranslationClient.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/OpenAiTranslationClient.kt) | OpenAI 兼容 API 客户端 |
+| [OpenAiTranslationClient.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/OpenAiTranslationClient.kt) | OpenAI 兼容 API 客户端（使用 HttpURLConnection） |
 | [AITranslationPrompt.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/AITranslationPrompt.kt) | AI 翻译 Prompt 构建 |
 | [AITranslationResponseParser.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/AITranslationResponseParser.kt) | AI 响应解析器 |
 | [AITranslationApplicator.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/AITranslationApplicator.kt) | 翻译结果应用器 |
@@ -298,7 +295,7 @@ AITranslator (门面)
     │   ├── 队列限制: 最多5个等待中
     │   └── 同 key 复用
     └── OpenAiTranslationClient (网络)
-        ├── HTTP POST 请求
+        ├── HTTP POST 请求 (HttpURLConnection)
         └── JSON 响应解析
 ```
 
@@ -351,7 +348,6 @@ AITranslator (门面)
 | [AutoLyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/AutoLyricSource.kt) | 自动歌词源（优先 LyricInfo，回退 LRC） |
 | [LyricInfoLyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/LyricInfoLyricSource.kt) | 歌词信息源 |
 | [MetadataLrcLyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/MetadataLrcLyricSource.kt) | 元数据 LRC 歌词源 |
-| [OnlineLyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/OnlineLyricSource.kt) | 在线歌词源 |
 | [TitleLyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/TitleLyricSource.kt) | 标题歌词源（仅显示歌名） |
 | [MetadataSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/MetadataSource.kt) | 元数据源，从通知提取媒体信息 |
 | [AppLyricSink.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/AppLyricSink.kt) | App 进程歌词接收器 |
@@ -362,10 +358,9 @@ AITranslator (门面)
 | 常量 | 值 | 说明 |
 |------|-----|------|
 | LYRIC_SOURCE_AUTO | 0 | 自动选择 |
-| LYRIC_SOURCE_ONLINE | 1 | 在线歌词 |
-| LYRIC_SOURCE_LYRIC_INFO | 2 | 歌词信息 |
-| LYRIC_SOURCE_LRC | 3 | LRC 元数据 |
-| LYRIC_SOURCE_TITLE | 4 | 仅标题 |
+| LYRIC_SOURCE_LYRIC_INFO | 1 | 歌词信息 |
+| LYRIC_SOURCE_LRC | 2 | LRC 元数据 |
+| LYRIC_SOURCE_TITLE | 3 | 仅标题 |
 
 #### 3.4.3 通知工具 (utils)
 
@@ -472,6 +467,7 @@ dispatchNotifications
 | [AppUtils.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/utils/AppUtils.kt) | 应用工具 |
 | [PageUtils.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/utils/PageUtils.kt) | 页面工具 |
 | [QuotesData.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/utils/QuotesData.kt) | 名言数据 |
+| [LicenseProvider.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/utils/LicenseProvider.kt) | 开源许可证数据提供者 |
 
 ---
 
@@ -498,7 +494,7 @@ LyricSource (提供者) → LyricSink (消费者)
 | 体系 | 运行进程 | 用途 | 歌词源 |
 |------|---------|------|--------|
 | Root 体系 | SystemUI 进程 | 超级岛歌词显示 | LyriconSource, SuperLyricSource, LyricInfoSource |
-| Service 体系 | App 进程 | 通知歌词显示 | AutoLyricSource, OnlineLyricSource, LyricInfoLyricSource, MetadataLrcLyricSource, TitleLyricSource |
+| Service 体系 | App 进程 | 通知歌词显示 | AutoLyricSource, LyricInfoLyricSource, MetadataLrcLyricSource, TitleLyricSource |
 
 #### 4.1.3 SourceManager 核心方法
 
@@ -600,7 +596,7 @@ translateSongSync(song, configs)
         ↓
     调度执行 (并发控制)
         ↓
-    OpenAI API 请求
+    OpenAI API 请求 (HttpURLConnection)
         ↓
     解析响应 (AITranslationResponseParser)
         ↓
@@ -617,29 +613,6 @@ translateSongSync(song, configs)
 - 最大缓存: 1000 首
 - 最大并发: 3 个
 - 最大队列: 5 个
-
-### 4.5 在线歌词搜索
-
-#### 4.5.1 支持的歌词源
-
-| 源 | 平台 |
-|----|------|
-| QmSource | QQ 音乐 |
-| NeSource | 网易云音乐 |
-
-#### 4.5.2 技术实现
-
-- 网络框架: Retrofit + OkHttp
-- 序列化: Kotlinx Serialization
-- 位置: [app/src/online/java/com/lidesheng/hyperlyric/online](file:///workspace/app/src/online/java/com/lidesheng/hyperlyric/online)
-
-#### 4.5.3 核心类
-
-| 类名 | 职责 |
-|------|------|
-| [LyricApiProvider.kt](file:///workspace/app/src/online/java/com/lidesheng/hyperlyric/online/LyricApiProvider.kt) | 在线歌词 API 提供者 |
-| [OnlineLyricTargeter.kt](file:///workspace/app/src/online/java/com/lidesheng/hyperlyric/online/OnlineLyricTargeter.kt) | 在线歌词匹配器 |
-| [LrcCacheManager.kt](file:///workspace/app/src/online/java/com/lidesheng/hyperlyric/online/LrcCacheManager.kt) | LRC 缓存管理器 |
 
 ---
 
@@ -733,8 +706,6 @@ translateSongSync(song, configs)
 | LibXposed API/Service | 101.0.0 | Xposed 框架 |
 | SuperLyric API | 3.4 | SuperLyric 歌词 API |
 | Lyricon Subscriber | 0.1.70 | Lyricon 歌词 SDK |
-| Retrofit | 2.11.0 | 网络请求 |
-| OkHttp | 4.12.0 | HTTP 客户端 |
 | Kotlinx Serialization | 1.6.3 | JSON 序列化 |
 | Kotlinx Coroutines | 1.9.0 | 协程 |
 | YoYo Animations | 2.4 | 动画库 |
@@ -748,9 +719,6 @@ translateSongSync(song, configs)
 ui → service → lyric → common
               ↓
             root (Xposed 模块，独立进程)
-
-online flavor → lyric (在线歌词实现)
-offline flavor → lyric (离线歌词实现)
 ```
 
 ### 6.3 AIDL 接口
@@ -780,14 +748,11 @@ offline flavor → lyric (离线歌词实现)
 ### 7.2 构建命令
 
 ```bash
-# 构建 online 版本（含在线歌词功能）
-./gradlew assembleOnlineRelease
-
-# 构建 offline 版本（仅本地歌词）
-./gradlew assembleOfflineRelease
-
-# 构建所有变体
+# 构建 Release 版本
 ./gradlew assembleRelease
+
+# 构建 Debug 版本
+./gradlew assembleDebug
 ```
 
 ### 7.3 安装与使用
@@ -809,38 +774,6 @@ offline flavor → lyric (离线歌词实现)
 ### 7.5 CI/CD
 
 GitHub Actions 配置位于 [.github/workflows/android_ci.yml](file:///workspace/.github/workflows/android_ci.yml)
-
----
-
-## 8. 产品 Flavor
-
-### 8.1 Flavor 维度
-
-- 维度名: `version`
-
-### 8.2 Online Flavor
-
-- **构建变体**: online
-- **特性**: 包含在线歌词搜索功能
-- **额外依赖**: Retrofit, OkHttp
-- **源码路径**: [app/src/online](file:///workspace/app/src/online)
-- **BuildConfig**: `ONLINE_FEATURES_ENABLED = true`
-
-### 8.3 Offline Flavor
-
-- **构建变体**: offline
-- **特性**: 仅本地歌词功能，无网络依赖
-- **源码路径**: [app/src/offline](file:///workspace/app/src/offline)
-- **BuildConfig**: `ONLINE_FEATURES_ENABLED = false`
-
-### 8.4 Flavor 特有类
-
-两个 flavor 都提供了各自的实现类：
-
-| 类 | Online 实现 | Offline 实现 |
-|----|------------|-------------|
-| LyricProviderImpl | 含在线歌词搜索 | 仅本地歌词 |
-| LicenseProvider | 在线版许可证 | 离线版许可证 |
 
 ---
 
@@ -868,6 +801,6 @@ App 进程与 Xposed（SystemUI）进程通过以下机制同步配置：
 
 ---
 
-*文档版本: 1.0*  
+*文档版本: 2.0 (Offline Edition)*  
 *生成日期: 2026-07-13*  
 *基于代码版本: v1.00 (versionCode 100)*
