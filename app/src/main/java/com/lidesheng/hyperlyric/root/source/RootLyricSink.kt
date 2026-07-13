@@ -71,6 +71,22 @@ class RootLyricSink(
         dispatchPositionThrottled(position)
     }
 
+    override fun onSeekTo(position: Long) {
+        LyriconDataBridge.updatePosition(position)
+        renderer.updateLyricLine()
+        renderer.updatePosition(position)
+    }
+
+    override fun onDisplayTranslationChanged(isDisplayTranslation: Boolean) {
+        LyriconDataBridge.isDisplayTranslation = isDisplayTranslation
+        renderer.refreshActiveIsland()
+    }
+
+    override fun onDisplayRomaChanged(isDisplayRoma: Boolean) {
+        LyriconDataBridge.isDisplayRoma = isDisplayRoma
+        renderer.refreshActiveIsland()
+    }
+
     private fun dispatchPositionThrottled(position: Long) {
         val now = SystemClock.uptimeMillis()
         val elapsed = now - lastPositionDispatchTimeMs

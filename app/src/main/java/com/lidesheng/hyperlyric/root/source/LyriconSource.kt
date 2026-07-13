@@ -3,7 +3,6 @@ package com.lidesheng.hyperlyric.root.source
 import android.app.Application
 import com.lidesheng.hyperlyric.lyric.source.LyricSink
 import com.lidesheng.hyperlyric.lyric.source.LyricSource
-import com.lidesheng.hyperlyric.root.island.renderer.BaseIslandRenderer
 import com.lidesheng.hyperlyric.root.LyriconDataBridge
 import com.lidesheng.hyperlyric.root.utils.HookLogger
 import io.github.proify.lyricon.lyric.model.Song
@@ -56,6 +55,7 @@ class LyriconSource : LyricSource {
     override fun stop() {
         try {
             subscriber?.unsubscribeActivePlayer(activePlayerListener)
+            subscriber?.removeConnectionListener(connectionListener)
             subscriber?.unregister()
             subscriber?.destroy()
         } catch (e: Exception) {
@@ -109,7 +109,6 @@ class LyriconSource : LyricSource {
             val localSong = song?.toLocalSong()
             LyriconDataBridge.updateSong(localSong)
             sink?.onSongChanged(localSong)
-            BaseIslandRenderer.refreshActiveIsland()
         }
 
         override fun onPlaybackStateChanged(isPlaying: Boolean) {
@@ -120,20 +119,20 @@ class LyriconSource : LyricSource {
             sink?.onPositionChanged(position)
         }
 
-        override fun onSeekTo(position: Long) {}
+        override fun onSeekTo(position: Long) {
+            sink?.onSeekTo(position)
+        }
 
         override fun onReceiveText(text: String?) {
             sink?.onPlainText(text)
         }
 
         override fun onDisplayTranslationChanged(isDisplayTranslation: Boolean) {
-            LyriconDataBridge.isDisplayTranslation = isDisplayTranslation
-            BaseIslandRenderer.refreshActiveIsland()
+            sink?.onDisplayTranslationChanged(isDisplayTranslation)
         }
 
         override fun onDisplayRomaChanged(isDisplayRoma: Boolean) {
-            LyriconDataBridge.isDisplayRoma = isDisplayRoma
-            BaseIslandRenderer.refreshActiveIsland()
+            sink?.onDisplayRomaChanged(isDisplayRoma)
         }
     }
 }
