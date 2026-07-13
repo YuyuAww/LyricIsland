@@ -11,10 +11,9 @@
   - [3.4 service 服务模块](#34-service-服务模块)
   - [3.5 ui 界面模块](#35-ui-界面模块)
 - [4. 核心功能详解](#4-核心功能详解)
-  - [4.1 歌词源管理系统](#41-歌词源管理系统)
+  - [4.1 歌词源管理](#41-歌词源管理)
   - [4.2 超级岛歌词注入](#42-超级岛歌词注入)
   - [4.3 通知歌词展示](#43-通知歌词展示)
-  - [4.4 AI 歌词翻译](#44-ai-歌词翻译)
 - [5. 关键数据结构](#5-关键数据结构)
 - [6. 依赖关系](#6-依赖关系)
 - [7. 项目构建与运行](#7-项目构建与运行)
@@ -30,8 +29,7 @@
 **核心功能**:
 - 通过 Xposed Hook 方式在 MIUI 超级岛（灵动岛）中显示歌词
 - 通过通知方式显示歌词（焦点通知/普通通知）
-- 支持多种歌词源（Lyricon、SuperLyric、LyricInfo、LRC 元数据等）
-- AI 歌词翻译功能
+- 使用 Lyricon 歌词源获取实时歌词
 - 丰富的样式自定义选项
 
 **技术栈**:
@@ -71,7 +69,6 @@
 │  (Xposed 模块)    │               │   工具类/常量/解析器     │
 │  HookEntry        │               └─────────────────────────┘
 │  IslandHooker     │
-│  AITranslator     │
 └───────────────────┘
 ```
 
@@ -91,10 +88,9 @@ com.lidesheng.hyperlyric
 │   ├── style/                 # 样式配置
 │   └── view/                  # 歌词视图相关
 ├── root/                      # Xposed Hook 模块
-│   ├── aitrans/               # AI 翻译
 │   ├── bridge/                # IPC 桥接
 │   ├── island/                # 超级岛注入
-│   ├── source/                # Root 进程歌词源
+│   ├── source/                # Root 进程歌词源（LyriconSource）
 │   └── utils/                 # Hook 工具
 ├── service/                   # 前台服务
 │   ├── scheduler/             # 调度器
@@ -120,8 +116,8 @@ com.lidesheng.hyperlyric
 
 | 类名 | 职责 |
 |------|------|
-| [RootConstants.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/RootConstants.kt) | Root Hook 相关的配置键名与默认值，包括超级岛、样式、动画、翻译、AI 翻译等配置 |
-| [ServiceConstants.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/ServiceConstants.kt) | 服务层相关配置键名与默认值，包括通知类型、白名单、歌词源类型等 |
+| [RootConstants.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/RootConstants.kt) | Root Hook 相关的配置键名与默认值，包括超级岛、样式、动画、翻译等配置 |
+| [ServiceConstants.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/ServiceConstants.kt) | 服务层相关配置键名与默认值，包括通知类型、白名单等 |
 | [PreferenceKeys.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/PreferenceKeys.kt) | SharedPreferences 名称与日志级别配置 |
 | [UIConstants.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/UIConstants.kt) | UI 相关常量 |
 
@@ -171,13 +167,8 @@ com.lidesheng.hyperlyric
 |------|------|
 | [LyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/source/LyricSource.kt) | 歌词源接口，定义 start/stop 等生命周期方法 |
 | [LyricSink.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/source/LyricSink.kt) | 歌词接收器接口，接收歌词更新 |
-| [SourceManager.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/source/SourceManager.kt) | 歌词源管理器，负责切换和管理多个歌词源 |
+| [SourceManager.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/source/SourceManager.kt) | 歌词源管理器 |
 | [StateResetter.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/source/StateResetter.kt) | 状态重置接口 |
-
-**SourceManager 工作流程**:
-1. 启动时根据配置选择默认歌词源
-2. 监听配置变更，动态切换歌词源
-3. 维护当前活跃歌词源的生命周期
 
 #### 3.2.3 动态数据与配置
 
@@ -188,7 +179,7 @@ com.lidesheng.hyperlyric
 
 #### 3.2.4 LyricState 数据结构
 
-定义在 [DynamicLyricData.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/DynamicLyricData.kt#L36-L57):
+定义在 [DynamicLyricData.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/DynamicLyricData.kt):
 
 ```kotlin
 data class LyricState(
@@ -226,7 +217,7 @@ data class LyricState(
 2. **onPackageLoaded**: 
    - 针对 `com.android.systemui`: 注入白名单解锁、Application 生命周期、ClassLoader 劫持
    - 针对 `miui.systemui.plugin`: 注入超级岛视图 Hook
-3. **AppCreateHooker**: 在 SystemUI 的 Application.onCreate 后初始化歌词源、渲染器、AI 翻译等
+3. **AppCreateHooker**: 在 SystemUI 的 Application.onCreate 后初始化 Lyricon 歌词源和渲染器
 4. **ClassLoaderHooker**: 劫持 ClassLoader 构造，捕获动态加载的插件并注入
 
 #### 3.3.2 超级岛注入 (island)
@@ -267,39 +258,9 @@ UpdateBigIslandViewHook
 | 类名 | 职责 |
 |------|------|
 | [LyriconSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/source/LyriconSource.kt) | Lyricon 歌词源，通过 Lyricon Subscriber SDK 获取歌词 |
-| [SuperLyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/source/SuperLyricSource.kt) | SuperLyric API 歌词源 |
-| [LyricInfoSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/source/LyricInfoSource.kt) | 歌词信息源 |
 | [RootLyricSink.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/source/RootLyricSink.kt) | Root 进程歌词接收器，将歌词传递给渲染器 |
 
-#### 3.3.4 AI 翻译 (aitrans)
-
-| 类名 | 职责 |
-|------|------|
-| [AITranslator.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/AITranslator.kt) | AI 翻译门面，对外提供翻译接口 |
-| [AITranslationScheduler.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/AITranslationScheduler.kt) | 翻译调度器，管理并发与队列 |
-| [AITranslationCache.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/AITranslationCache.kt) | 翻译缓存（内存+SQLite） |
-| [AITranslationKey.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/AITranslationKey.kt) | 翻译缓存键生成 |
-| [OpenAiTranslationClient.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/OpenAiTranslationClient.kt) | OpenAI 兼容 API 客户端（使用 HttpURLConnection） |
-| [AITranslationPrompt.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/AITranslationPrompt.kt) | AI 翻译 Prompt 构建 |
-| [AITranslationResponseParser.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/AITranslationResponseParser.kt) | AI 响应解析器 |
-| [AITranslationApplicator.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/AITranslationApplicator.kt) | 翻译结果应用器 |
-| [AITranslationModels.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/aitrans/AITranslationModels.kt) | 翻译相关数据模型 |
-
-**AI 翻译架构**:
-
-```
-AITranslator (门面)
-    ├── 缓存检查: 内存 → SQLite
-    ├── AITranslationScheduler (调度)
-    │   ├── 并发限制: 最多3个运行中
-    │   ├── 队列限制: 最多5个等待中
-    │   └── 同 key 复用
-    └── OpenAiTranslationClient (网络)
-        ├── HTTP POST 请求 (HttpURLConnection)
-        └── JSON 响应解析
-```
-
-#### 3.3.5 桥接 (bridge)
+#### 3.3.4 桥接 (bridge)
 
 | 类名 | 职责 |
 |------|------|
@@ -307,7 +268,7 @@ AITranslator (门面)
 | [IpcRouter.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/bridge/IpcRouter.kt) | IPC 路由 |
 | [LyriconBridge.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/root/bridge/LyriconBridge.kt) | Lyricon 桥接 |
 
-#### 3.3.6 白名单解锁
+#### 3.3.5 白名单解锁
 
 | 类名 | 职责 |
 |------|------|
@@ -344,23 +305,12 @@ AITranslator (门面)
 | 类名 | 职责 |
 |------|------|
 | [ServiceLyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/ServiceLyricSource.kt) | 服务端歌词源接口 |
-| [ServiceSourceManager.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/ServiceSourceManager.kt) | 服务端歌词源管理器 |
 | [AutoLyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/AutoLyricSource.kt) | 自动歌词源（优先 LyricInfo，回退 LRC） |
 | [LyricInfoLyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/LyricInfoLyricSource.kt) | 歌词信息源 |
 | [MetadataLrcLyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/MetadataLrcLyricSource.kt) | 元数据 LRC 歌词源 |
-| [TitleLyricSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/TitleLyricSource.kt) | 标题歌词源（仅显示歌名） |
 | [MetadataSource.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/MetadataSource.kt) | 元数据源，从通知提取媒体信息 |
 | [AppLyricSink.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/AppLyricSink.kt) | App 进程歌词接收器 |
 | [SyncData.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/service/source/SyncData.kt) | 同步数据模型 |
-
-**歌词源类型** (定义在 [ServiceConstants.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/ServiceConstants.kt)):
-
-| 常量 | 值 | 说明 |
-|------|-----|------|
-| LYRIC_SOURCE_AUTO | 0 | 自动选择 |
-| LYRIC_SOURCE_LYRIC_INFO | 1 | 歌词信息 |
-| LYRIC_SOURCE_LRC | 2 | LRC 元数据 |
-| LYRIC_SOURCE_TITLE | 3 | 仅标题 |
 
 #### 3.4.3 通知工具 (utils)
 
@@ -412,33 +362,14 @@ dispatchNotifications
 | [Navigator.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/navigation/Navigator.kt) | 导航器封装 |
 | [Route.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/navigation/Route.kt) | 路由定义（sealed class） |
 
-**路由列表**:
-
-| 路由 | 页面 |
-|------|------|
-| Route.Setup | 引导设置页 |
-| Route.Main | 主页 |
-| Route.Settings | 设置页 |
-| Route.HookSettings | Hook 设置页 |
-| Route.LyricProvider | 歌词源设置页 |
-| Route.LyricAnimation | 歌词动画页 |
-| Route.LyricSettings | 歌词设置页 |
-| Route.SuperIslandSettings | 超级岛设置页 |
-| Route.DynamicIslandNotification | 灵动岛通知页 |
-| Route.Log | 日志页 |
-| Route.Licenses | 许可证页 |
-| Route.Poetry | 诗词页 |
-| Route.Help | 帮助页 |
-| Route.Changelog | 更新日志页 |
-
 #### 3.5.3 页面 (page)
 
 | 页面 | 职责 |
 |------|------|
 | [MainPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/MainPage.kt) | 主页面 |
 | [SetupPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/SetupPage.kt) | 引导设置页 |
-| [SettingsPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/SettingsPage.kt) | 设置页 |
 | [HookSettingsPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/HookSettingsPage.kt) | Hook 模块设置页 |
+| [LyricSettingsPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/hooksettings/LyricSettingsPage.kt) | 歌词设置页 |
 | [DynamicIslandNotificationPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/DynamicIslandNotificationPage.kt) | 灵动岛通知设置页 |
 | [LogPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/LogPage.kt) | 日志查看页 |
 | [HelpPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/HelpPage.kt) | 帮助页 |
@@ -446,34 +377,11 @@ dispatchNotifications
 | [LicensesPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/LicensesPage.kt) | 开源许可证页 |
 | [PoetryPage.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/page/PoetryPage.kt) | 诗词页 |
 
-#### 3.5.4 组件 (component)
-
-| 组件 | 职责 |
-|------|------|
-| [SuperComponent.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/component/SuperComponent.kt) | 超级组件 |
-| [SuperSearchBar.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/component/SuperSearchBar.kt) | 搜索栏组件 |
-| [SuperSwitchPreference.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/component/SuperSwitchPreference.kt) | 开关偏好组件 |
-| [ProComponent.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/component/ProComponent.kt) | 专业版组件 |
-| [Dialogs.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/component/Dialogs.kt) | 对话框组件 |
-| [TagComponent.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/component/TagComponent.kt) | 标签组件 |
-| [SearchStatus.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/component/SearchStatus.kt) | 搜索状态组件 |
-
-#### 3.5.5 UI 工具 (utils)
-
-| 类名 | 职责 |
-|------|------|
-| [ThemeUtils.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/utils/ThemeUtils.kt) | 主题工具 |
-| [LocaleUtils.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/utils/LocaleUtils.kt) | 国际化工具 |
-| [AppUtils.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/utils/AppUtils.kt) | 应用工具 |
-| [PageUtils.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/utils/PageUtils.kt) | 页面工具 |
-| [QuotesData.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/utils/QuotesData.kt) | 名言数据 |
-| [LicenseProvider.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/ui/utils/LicenseProvider.kt) | 开源许可证数据提供者 |
-
 ---
 
 ## 4. 核心功能详解
 
-### 4.1 歌词源管理系统
+### 4.1 歌词源管理
 
 #### 4.1.1 架构设计
 
@@ -484,26 +392,15 @@ LyricSource (提供者) → LyricSink (消费者)
       ↑                       ↑
       │                       │
   SourceManager          RootLyricSink / AppLyricSink
-  (切换/管理)            (渲染/通知)
+  (管理)                (渲染/通知)
 ```
 
 #### 4.1.2 两套歌词源体系
 
-项目中有两套独立的歌词源体系，分别运行在不同进程中：
-
 | 体系 | 运行进程 | 用途 | 歌词源 |
 |------|---------|------|--------|
-| Root 体系 | SystemUI 进程 | 超级岛歌词显示 | LyriconSource, SuperLyricSource, LyricInfoSource |
-| Service 体系 | App 进程 | 通知歌词显示 | AutoLyricSource, LyricInfoLyricSource, MetadataLrcLyricSource, TitleLyricSource |
-
-#### 4.1.3 SourceManager 核心方法
-
-定义在 [SourceManager.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/source/SourceManager.kt):
-
-- `start()`: 启动歌词源管理器，选择默认源并启动
-- `switchSource(sourceId)`: 切换到指定歌词源
-- `getActiveSource()`: 获取当前活跃歌词源
-- `stop()`: 停止所有歌词源
+| Root 体系 | SystemUI 进程 | 超级岛歌词显示 | LyriconSource |
+| Service 体系 | App 进程 | 通知歌词显示 | AutoLyricSource (LyricInfo + LRC) |
 
 ### 4.2 超级岛歌词注入
 
@@ -513,7 +410,7 @@ LyricSource (提供者) → LyricSink (消费者)
 
 #### 4.2.2 Hook 点
 
-1. **Application.onCreate**: 初始化歌词环境
+1. **Application.onCreate**: 初始化 Lyricon 歌词源和渲染器
 2. **ClassLoader 构造**: 捕获动态加载的插件
 3. **超级岛视图更新**: 拦截 `updateBigIslandView` 等方法
 4. **布局可见性变化**: 监听视图可见性变化，恢复歌词视图
@@ -568,52 +465,6 @@ IslandHostFacade.injectHostGlow()  注入光晕效果
 4. 恢复网络
 ```
 
-### 4.4 AI 歌词翻译
-
-#### 4.4.1 功能特性
-
-- 基于 OpenAI 兼容 API 的歌词翻译
-- 内存 + SQLite 双层缓存
-- 并发控制（最多 3 个同时翻译）
-- 队列管理（最多 5 个等待）
-- 切歌时自动取消旧请求
-- 可自定义 Prompt、模型、温度等参数
-
-#### 4.4.2 翻译流程
-
-```
-translateSongSync(song, configs)
-    ↓
-检查配置是否可用
-    ↓
-计算缓存 key (AITranslationKey)
-    ↓
-┌─ 内存缓存命中？→ 是 → 返回
-│       ↓ 否
-├─ SQLite 缓存命中？→ 是 → 写入内存 → 返回
-│       ↓ 否
-└─ 加入翻译队列 (AITranslationScheduler)
-        ↓
-    调度执行 (并发控制)
-        ↓
-    OpenAI API 请求 (HttpURLConnection)
-        ↓
-    解析响应 (AITranslationResponseParser)
-        ↓
-    写入缓存（内存 + SQLite）
-        ↓
-    应用翻译结果 (AITranslationApplicator)
-```
-
-#### 4.4.3 默认配置
-
-- 默认模型: `mimo-v2-flash` (小米 Mimo)
-- 默认 Base URL: `https://api.xiaomimimo.com/v1/`
-- 默认目标语言: 中文
-- 最大缓存: 1000 首
-- 最大并发: 3 个
-- 最大队列: 5 个
-
 ---
 
 ## 5. 关键数据结构
@@ -647,13 +498,13 @@ translateSongSync(song, configs)
 
 ### 5.3 LyricState（歌词状态）
 
-定义在 [DynamicLyricData.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/DynamicLyricData.kt#L36-L57):
+定义在 [DynamicLyricData.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/DynamicLyricData.kt):
 
 全局单例状态容器，使用 Kotlin Flow 驱动响应式更新。
 
 ### 5.4 PlaybackAnchor（播放锚点）
 
-定义在 [DynamicLyricData.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/DynamicLyricData.kt#L29-L34):
+定义在 [DynamicLyricData.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/DynamicLyricData.kt):
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -662,11 +513,9 @@ translateSongSync(song, configs)
 | speed | Float | 播放速度 |
 | isPlaying | Boolean | 是否播放中 |
 
-用于在没有实时进度回调时，根据时间戳推算当前播放位置。
-
 ### 5.5 支持的音乐应用
 
-定义在 [DynamicLyricData.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/DynamicLyricData.kt#L12-L27):
+定义在 [DynamicLyricData.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/DynamicLyricData.kt):
 
 | 包名 | 应用名 |
 |------|--------|
@@ -704,7 +553,6 @@ translateSongSync(song, configs)
 | HiddenApiBypass | 4.3 | 隐藏 API 绕过 |
 | Shizuku API | 13.1.5 | Shizuku 权限框架 |
 | LibXposed API/Service | 101.0.0 | Xposed 框架 |
-| SuperLyric API | 3.4 | SuperLyric 歌词 API |
 | Lyricon Subscriber | 0.1.70 | Lyricon 歌词 SDK |
 | Kotlinx Serialization | 1.6.3 | JSON 序列化 |
 | Kotlinx Coroutines | 1.9.0 | 协程 |
@@ -765,11 +613,7 @@ ui → service → lyric → common
 
 ### 7.4 Xposed 模块配置
 
-模块配置文件位于 [app/src/main/resources/META-INF/xposed](file:///workspace/app/src/main/resources/META-INF/xposed):
-
-- [module.prop](file:///workspace/app/src/main/resources/META-INF/xposed/module.prop): 模块属性
-- [java_init.list](file:///workspace/app/src/main/resources/META-INF/xposed/java_init.list): Java 初始化类列表
-- [scope.list](file:///workspace/app/src/main/resources/META-INF/xposed/scope.list): 作用域列表
+模块配置文件位于 [app/src/main/resources/META-INF/xposed](file:///workspace/app/src/main/resources/META-INF/xposed)
 
 ### 7.5 CI/CD
 
@@ -792,15 +636,12 @@ App 进程与 Xposed（SystemUI）进程通过以下机制同步配置：
 - **HyperLogger 接口**: 统一的日志抽象
 - **HookLogger**: Root 进程的日志实现
 - **LogManager**: App 进程的日志管理
-- **日志级别**: 可配置，默认级别 0
 
 ### C. 备份与恢复
 
 - [BackupRestoreManager.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/utils/BackupRestoreManager.kt): 配置备份恢复管理
-- 支持 Android 自动备份（[backup_rules.xml](file:///workspace/app/src/main/res/xml/backup_rules.xml)）
 
 ---
 
-*文档版本: 2.0 (Offline Edition)*  
-*生成日期: 2026-07-13*  
-*基于代码版本: v1.00 (versionCode 100)*
+*文档版本: 3.0 (Lyricon Only)*  
+*生成日期: 2026-07-13*
