@@ -25,6 +25,4 @@
 # --- Shizuku User Service ---
 -keep class com.lidesheng.hyperlyric.service.utils.shizuku.PrivilegedServiceImpl { *; }
 
-# --- SuperLyric API ---
--keep class com.hchen.superlyricapi.* { *; }
 -dontwarn android.os.ServiceManager

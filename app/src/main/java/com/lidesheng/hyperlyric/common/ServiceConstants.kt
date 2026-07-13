@@ -21,13 +21,6 @@ object ServiceConstants {
     const val KEY_NOTIFICATION_HIGHLIGHT_COLOR = "key_notification_island_highlight_color"
     const val KEY_NOTIFICATION_SONG_INFO_HIGHLIGHT_COLOR = "key_notification_song_info_highlight_color"
     const val KEY_BYPASS_FOCUS_NOTIFICATION_LIMIT = "key_bypass_focus_notification_limit"
-    const val KEY_SERVICE_LYRIC_SOURCE = "key_service_lyric_source"
-
-    // ================= LYRIC SOURCE TYPES =================
-    const val LYRIC_SOURCE_AUTO = 0
-    const val LYRIC_SOURCE_LYRIC_INFO = 1
-    const val LYRIC_SOURCE_LRC = 2
-    const val LYRIC_SOURCE_TITLE = 3
 
     // ================= DEFAULTS =================
     const val DEFAULT_NOTIFICATION_TYPE = 0
@@ -45,5 +38,4 @@ object ServiceConstants {
     const val DEFAULT_NOTIFICATION_HIGHLIGHT_COLOR = false
     const val DEFAULT_NOTIFICATION_SONG_INFO_HIGHLIGHT_COLOR = false
     const val DEFAULT_BYPASS_FOCUS_NOTIFICATION_LIMIT = false
-    const val DEFAULT_SERVICE_LYRIC_SOURCE = 0
 }

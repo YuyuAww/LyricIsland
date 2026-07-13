@@ -71,9 +71,6 @@ dependencies {
     compileOnly(libs.libxposed.api)
     implementation(libs.libxposed.service)
 
-    // SuperLyric API
-    implementation(libs.superlyricapi)
-
     // Lyricon Subscriber SDK
     implementation(libs.lyricon.subscriber)
 

@@ -170,50 +170,6 @@ private fun LazyListScope.superIslandHelpSections() {
             }
         }
     }
-    item(key = "source_superlyric") {
-        val context = LocalContext.current
-        Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp).fillMaxWidth()) {
-            Column {
-                BasicComponent(
-                    title = "SuperLyric",
-                    summary = stringResource(R.string.summary_help_source_superlyric)
-                )
-                FlowRow(
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    TagComponent(
-                        text = stringResource(R.string.tag_download_superlyric),
-                        onClick = {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, "https://github.com/HChenX/SuperLyric".toUri()))
-                        }
-                    )
-                }
-            }
-        }
-    }
-    item(key = "source_lyricinfo") {
-        val context = LocalContext.current
-        Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp).fillMaxWidth()) {
-            Column {
-                BasicComponent(
-                    title = "LyricInfo",
-                    summary = stringResource(R.string.summary_help_source_lyricinfo)
-                )
-                FlowRow(
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    TagComponent(
-                        text = stringResource(R.string.tag_download_lyricinfo),
-                        onClick = {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, "https://github.com/limczhh/LyricInfo".toUri()))
-                        }
-                    )
-                }
-            }
-        }
-    }
 }
 
 private fun LazyListScope.dynamicIslandHelpSections() {

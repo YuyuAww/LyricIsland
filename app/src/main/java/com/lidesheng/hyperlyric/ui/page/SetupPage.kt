@@ -41,7 +41,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import com.lidesheng.hyperlyric.R
-import com.lidesheng.hyperlyric.common.RootConstants
 import com.lidesheng.hyperlyric.common.UIConstants
 import com.lidesheng.hyperlyric.lyric.ConfigRepository
 import com.lidesheng.hyperlyric.lyric.commonMusicApps
@@ -65,7 +64,6 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Info
 import top.yukonga.miuix.kmp.preference.ArrowPreference
-import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import kotlin.time.Duration.Companion.milliseconds
@@ -82,10 +80,6 @@ fun SetupPage(onNavigateToMain: () -> Unit) {
     var workMode by remember {
         val initialMode = prefs.getInt(UIConstants.KEY_WORK_MODE, UIConstants.DEFAULT_WORK_MODE)
         mutableIntStateOf(initialMode)
-    }
-
-    var selectedSource by remember {
-        mutableStateOf(prefs.getString(RootConstants.KEY_HOOK_LYRIC_SOURCE, RootConstants.DEFAULT_HOOK_LYRIC_SOURCE) ?: "lyricon")
     }
 
     val onFinish = {
@@ -161,14 +155,8 @@ fun SetupPage(onNavigateToMain: () -> Unit) {
                     }
                 )
                 1 -> if (workMode == 0) DisclaimerPage() else PermissionPage()
-                2 -> if (workMode == 0) LyricSourceSelectionPage(
-                    selectedSource = selectedSource,
-                    onSourceSelected = { source ->
-                        selectedSource = source
-                        prefs.edit { putString(RootConstants.KEY_HOOK_LYRIC_SOURCE, source) }
-                    }
-                ) else WhitelistPage()
-                3 -> CompletionPage(workMode = workMode, selectedSource = selectedSource)
+                2 -> if (workMode == 0) Spacer(modifier = Modifier.fillMaxSize()) else WhitelistPage()
+                3 -> CompletionPage(workMode = workMode)
             }
         }
     }
@@ -369,98 +357,9 @@ fun WhitelistPage() {
 }
 
 @Composable
-fun LyricSourceSelectionPage(selectedSource: String, onSourceSelected: (String) -> Unit) {
-    val context = LocalContext.current
-    val sourceOptions = listOf(
-        stringResource(R.string.lyric_source_lyricon),
-        stringResource(R.string.lyric_source_superlyric),
-        stringResource(R.string.lyric_source_lyricinfo)
-    )
-    val sourceIds = listOf("lyricon", "superlyric", "lyricinfo")
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
-            Text(
-                text = stringResource(R.string.setup_select_lyric_source),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(vertical = 20.dp)
-            )
-        }
-        item {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                OverlayDropdownPreference(
-                    title = stringResource(R.string.title_lyric_source),
-                    items = sourceOptions,
-                    selectedIndex = sourceIds.indexOf(selectedSource).coerceAtLeast(0),
-                    onSelectedIndexChange = { index ->
-                        onSourceSelected(sourceIds[index])
-                    }
-                )
-            }
-        }
-        item {
-            when (selectedSource) {
-                "lyricon" -> {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Column {
-                            ArrowPreference(
-                                title = stringResource(R.string.setup_download_lyric_core),
-                                summary = stringResource(R.string.setup_download_lyric_core_summary),
-                                onClick = {
-                                    context.startActivity(Intent(Intent.ACTION_VIEW,
-                                        "https://github.com/tomakino/lyricon/releases/tag/core".toUri()))
-                                }
-                            )
-                            ArrowPreference(
-                                title = stringResource(R.string.setup_download_provider),
-                                summary = stringResource(R.string.setup_download_provider_summary),
-                                onClick = {
-                                    context.startActivity(Intent(Intent.ACTION_VIEW,
-                                        "https://github.com/proify/LyricProvider/releases".toUri()))
-                                }
-                            )
-                        }
-                    }
-                }
-                "superlyric" -> {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        ArrowPreference(
-                            title = stringResource(R.string.setup_download_superlyric),
-                            summary = stringResource(R.string.setup_download_superlyric_summary),
-                            onClick = {
-                                context.startActivity(Intent(Intent.ACTION_VIEW,
-                                    "https://github.com/HChenX/SuperLyric".toUri()))
-                            }
-                        )
-                    }
-                }
-                "lyricinfo" -> {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        BasicComponent(
-                            title = stringResource(R.string.setup_no_dependency),
-                            summary = stringResource(R.string.setup_no_dependency_summary)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun CompletionPage(workMode: Int, selectedSource: String = "lyricon") {
+fun CompletionPage(workMode: Int) {
     val completionText = if (workMode == 0) {
-        when (selectedSource) {
-            "superlyric" -> stringResource(R.string.setup_completion_superlyric)
-            "lyricinfo" -> stringResource(R.string.setup_completion_lyricinfo)
-            else -> stringResource(R.string.setup_completion_lyricon)
-        }
+        stringResource(R.string.setup_completion_lyricon)
     } else {
         stringResource(R.string.setup_completion_dynamic_island)
     }

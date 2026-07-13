@@ -211,8 +211,8 @@ class HookEntry : XposedModule() {
                         sources = listOf(lyriconSource),
                         prefs = entry.prefs,
                         sink = sink,
-                        prefKey = RootConstants.KEY_HOOK_LYRIC_SOURCE,
-                        defaultSourceId = RootConstants.DEFAULT_HOOK_LYRIC_SOURCE,
+                        prefKey = "key_hook_lyric_source",
+                        defaultSourceId = "lyricon",
                         stateResetter = LyriconDataBridge,
                         logger = HookLogger
                     )

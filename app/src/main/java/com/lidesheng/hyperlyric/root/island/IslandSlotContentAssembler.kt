@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.text.TextPaint
 import android.view.View
-import com.lidesheng.hyperlyric.common.RootConstants
 import com.lidesheng.hyperlyric.common.lyric.RichLyricLineSplitter
 import com.lidesheng.hyperlyric.common.media.MediaMetadataHelper
 import com.lidesheng.hyperlyric.lyric.model.RichLyricLine
@@ -343,8 +342,8 @@ internal object IslandSlotContentAssembler {
         config: IslandSlotRuntimeConfig
     ): Boolean {
         if (!config.nextLyricLine || config.isSplitMode) return false
-        val source = prefs.getString(RootConstants.KEY_HOOK_LYRIC_SOURCE, RootConstants.DEFAULT_HOOK_LYRIC_SOURCE)
-        return source == "lyricon" || source == "lyricinfo"
+        // 当前仅支持 Lyricon 源，无需再检查歌词源类型
+        return true
     }
 
     private fun IRichLyricLine.withNextLinePreview(nextLine: IRichLyricLine?): IRichLyricLine {

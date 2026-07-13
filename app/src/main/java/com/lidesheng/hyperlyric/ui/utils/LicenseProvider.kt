@@ -20,10 +20,7 @@ object LicenseProvider {
             LicenseItem("Kotlin Coroutines", "Kotlin", "https://github.com/Kotlin/kotlinx.coroutines"),
             LicenseItem("Shizuku", "RikkaApps", "https://github.com/RikkaApps/Shizuku"),
             LicenseItem("Capsulyric", "FrancoGiudans", "https://github.com/FrancoGiudans/Capsulyric"),
-            LicenseItem("InstallerX-Revived", "wxxsfxyzm", "https://github.com/wxxsfxyzm/InstallerX-Revived"),
-            LicenseItem("SuperLyric", "HChenX", "https://github.com/HChenX/SuperLyric"),
-            LicenseItem("SuperLyricApi", "HChenX", "https://github.com/HChenX/SuperLyricApi"),
-            LicenseItem("LyricInfo", "lidesheng", "https://github.com/limczhh/LyricInfo")
+            LicenseItem("InstallerX-Revived", "wxxsfxyzm", "https://github.com/wxxsfxyzm/InstallerX-Revived")
         )
     }
 }
