@@ -23,8 +23,6 @@ fun LazyListScope.homePageSections(
     onQuoteLongPress: () -> Unit,
     enableSuperIsland: Boolean,
     onSuperIslandToggle: (Boolean) -> Unit,
-    enableDynamicIsland: Boolean,
-    onDynamicIslandToggle: (Boolean) -> Unit,
     onSuperIslandConfigClick: () -> Unit,
     onRestartClick: () -> Unit,
     removeFocusWhitelist: Boolean,
@@ -70,12 +68,6 @@ fun LazyListScope.homePageSections(
                         onClick = onSuperIslandConfigClick,
                     )
                 }
-                SwitchPreference(
-                    title = stringResource(R.string.title_dynamic_island_lyrics),
-                    summary = stringResource(R.string.summary_dynamic_island_lyrics),
-                    checked = enableDynamicIsland,
-                    onCheckedChange = onDynamicIslandToggle,
-                )
 
             }
         }
