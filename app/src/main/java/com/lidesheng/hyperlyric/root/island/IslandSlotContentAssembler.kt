@@ -2,9 +2,9 @@ package com.lidesheng.hyperlyric.root.island
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.text.TextPaint
+
 import android.view.View
-import com.lidesheng.hyperlyric.common.lyric.RichLyricLineSplitter
+
 import com.lidesheng.hyperlyric.common.media.MediaMetadataHelper
 import com.lidesheng.hyperlyric.lyric.model.RichLyricLine
 import com.lidesheng.hyperlyric.lyric.model.lyricMetadataOf
@@ -131,29 +131,7 @@ internal object IslandSlotContentAssembler {
         config: IslandSlotRuntimeConfig,
         isLeft: Boolean
     ): IRichLyricLine? {
-        val rawLine = processedRawLine(prefs, config)
-        if (!config.isSplitMode || rawLine == null) return rawLine
-        if (rawLine.text.isNullOrEmpty()) return rawLine
-
-        val density = view.resources.displayMetrics.density
-        val leftMaxPx = config.leftMaxWidthDp * density
-        val textPaint = TextPaint().apply {
-            textSize = config.textSizeSp.toFloat() * density
-        }
-        val splitPx = if (config.centerLyric) {
-            val textWidth = textPaint.measureText(rawLine.text ?: "")
-            (textWidth / 2f).coerceAtMost(leftMaxPx)
-        } else {
-            leftMaxPx
-        }
-        val splitResult = RichLyricLineSplitter.split(
-            rawLine,
-            textPaint,
-            splitPx,
-            config.textSizeRatio,
-            config.centerLyric
-        )
-        return if (isLeft) splitResult.left else splitResult.right
+        return processedRawLine(prefs, config)
     }
 
     fun processedRawLine(prefs: SharedPreferences, config: IslandSlotRuntimeConfig? = null): IRichLyricLine? {
