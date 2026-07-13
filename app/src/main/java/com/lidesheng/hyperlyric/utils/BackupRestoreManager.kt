@@ -19,7 +19,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import com.lidesheng.hyperlyric.common.RootConstants
 import com.lidesheng.hyperlyric.common.ServiceConstants
 import com.lidesheng.hyperlyric.common.UIConstants
 
@@ -28,7 +27,7 @@ object BackupRestoreManager {
         val prefs = context.getSharedPreferences(UIConstants.PREF_NAME, Context.MODE_PRIVATE)
         val config = JSONObject()
         prefs.all.forEach { (key, value) ->
-            if (key == RootConstants.KEY_HOOK_AI_TRANS_API_KEY) return@forEach
+            if (key.startsWith("key_hook_ai_trans_")) return@forEach
             when (value) {
                 is Boolean -> config.put(key, value)
                 is Int -> config.put(key, value)
@@ -60,7 +59,7 @@ object BackupRestoreManager {
                     val key = keys.next()
                     val value = config.get(key)
                     if (key == "key_send_normal_notification" || key == "key_send_focus_notification" || key == "key_persistent_foreground"
-                        || key == RootConstants.KEY_HOOK_AI_TRANS_API_KEY) continue
+                        || key.startsWith("key_hook_ai_trans_")) continue
                     if (key == ServiceConstants.KEY_NOTIFICATION_WHITELIST) {
                         val raw = value.toString()
                         val set = if (raw.isBlank()) emptySet() else raw.split(",").map { it.trim() }.filter { it.isNotEmpty() }.toSet()

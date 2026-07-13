@@ -70,10 +70,6 @@ class LyriconSource : LyricSource {
 
     fun initialize(app: Application) {
         this.app = app
-
-        LyriconDataBridge.onAiTranslationComplete = {
-            BaseIslandRenderer.refreshActiveIsland()
-        }
     }
 
     private fun initializeSubscriber(app: Application) {
