@@ -118,6 +118,12 @@ fun MainPage() {
     var enableSuperIsland by remember {
         mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_ENABLE_SUPER_ISLAND, RootConstants.DEFAULT_HOOK_ENABLE_SUPER_ISLAND))
     }
+    var removeFocusWhitelist by remember {
+        mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_REMOVE_FOCUS_WHITELIST, RootConstants.DEFAULT_HOOK_REMOVE_FOCUS_WHITELIST))
+    }
+    var removeIslandWhitelist by remember {
+        mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_REMOVE_ISLAND_WHITELIST, RootConstants.DEFAULT_HOOK_REMOVE_ISLAND_WHITELIST))
+    }
 
     // --- dialogs ---
     var showRestartDialog by remember { mutableStateOf(false) }
@@ -130,6 +136,10 @@ fun MainPage() {
                     floatingNavBarEnabled = p.getBoolean(UIConstants.KEY_FLOATING_NAV_BAR, UIConstants.DEFAULT_FLOATING_NAV_BAR)
                 RootConstants.KEY_HOOK_ENABLE_SUPER_ISLAND ->
                     enableSuperIsland = p.getBoolean(RootConstants.KEY_HOOK_ENABLE_SUPER_ISLAND, RootConstants.DEFAULT_HOOK_ENABLE_SUPER_ISLAND)
+                RootConstants.KEY_HOOK_REMOVE_FOCUS_WHITELIST ->
+                    removeFocusWhitelist = p.getBoolean(RootConstants.KEY_HOOK_REMOVE_FOCUS_WHITELIST, RootConstants.DEFAULT_HOOK_REMOVE_FOCUS_WHITELIST)
+                RootConstants.KEY_HOOK_REMOVE_ISLAND_WHITELIST ->
+                    removeIslandWhitelist = p.getBoolean(RootConstants.KEY_HOOK_REMOVE_ISLAND_WHITELIST, RootConstants.DEFAULT_HOOK_REMOVE_ISLAND_WHITELIST)
             }
         }
     }
@@ -377,6 +387,48 @@ fun MainPage() {
                         onSuperIslandToggle = toggleSuperIsland,
                         onSuperIslandConfigClick = { navigator.navigate(Route.HookSettings) },
                         onRestartClick = { showRestartDialog = true },
+                        removeFocusWhitelist = removeFocusWhitelist,
+                        onRemoveFocusWhitelistToggle = { isChecked ->
+                            if (isChecked) {
+                                if (RootApplication.xposedService != null) {
+                                    removeFocusWhitelist = true
+                                    prefs.edit { putBoolean(RootConstants.KEY_HOOK_REMOVE_FOCUS_WHITELIST, true) }
+                                    PrefsBridge.putBoolean(RootConstants.KEY_HOOK_REMOVE_FOCUS_WHITELIST, true)
+                                } else {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = msgXposedNotActive,
+                                            duration = SnackbarDuration.Custom(2000L)
+                                        )
+                                    }
+                                }
+                            } else {
+                                removeFocusWhitelist = false
+                                prefs.edit { putBoolean(RootConstants.KEY_HOOK_REMOVE_FOCUS_WHITELIST, false) }
+                                PrefsBridge.putBoolean(RootConstants.KEY_HOOK_REMOVE_FOCUS_WHITELIST, false)
+                            }
+                        },
+                        removeIslandWhitelist = removeIslandWhitelist,
+                        onRemoveIslandWhitelistToggle = { isChecked ->
+                            if (isChecked) {
+                                if (RootApplication.xposedService != null) {
+                                    removeIslandWhitelist = true
+                                    prefs.edit { putBoolean(RootConstants.KEY_HOOK_REMOVE_ISLAND_WHITELIST, true) }
+                                    PrefsBridge.putBoolean(RootConstants.KEY_HOOK_REMOVE_ISLAND_WHITELIST, true)
+                                } else {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = msgXposedNotActive,
+                                            duration = SnackbarDuration.Custom(2000L)
+                                        )
+                                    }
+                                }
+                            } else {
+                                removeIslandWhitelist = false
+                                prefs.edit { putBoolean(RootConstants.KEY_HOOK_REMOVE_ISLAND_WHITELIST, false) }
+                                PrefsBridge.putBoolean(RootConstants.KEY_HOOK_REMOVE_ISLAND_WHITELIST, false)
+                            }
+                        },
                         onAppSettingsClick = { navigator.navigate(Route.Settings) },
                     )
                 } else {
