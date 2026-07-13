@@ -6,10 +6,7 @@ import com.lidesheng.hyperlyric.root.island.SystemUIHookRegistry
 import com.lidesheng.hyperlyric.root.island.renderer.IslandRenderer
 import com.lidesheng.hyperlyric.root.island.renderer.BaseIslandRenderer
 import com.lidesheng.hyperlyric.root.source.LyriconSource
-import com.lidesheng.hyperlyric.root.source.LyricInfoSource
 import com.lidesheng.hyperlyric.root.source.RootLyricSink
-import com.lidesheng.hyperlyric.root.source.SuperLyricSource
-import com.lidesheng.hyperlyric.root.aitrans.AITranslator
 import com.lidesheng.hyperlyric.root.utils.HookLogger
 import com.lidesheng.hyperlyric.common.RootConstants
 import com.lidesheng.hyperlyric.common.UIConstants
@@ -25,8 +22,6 @@ class HookEntry : XposedModule() {
         @Volatile
         var activeMode = 0
         val lyriconSource = LyriconSource()
-        val superLyricSource = SuperLyricSource()
-        var lyricInfoSource: LyricInfoSource? = null
         var sourceManager: SourceManager? = null
             private set
 
@@ -211,13 +206,9 @@ class HookEntry : XposedModule() {
                     IpcRouter.initialize(app)
 
                     lyriconSource.initialize(app)
-                    superLyricSource.initialize(app)
-                    lyricInfoSource = LyricInfoSource(app)
-
-                    AITranslator.init(app)
 
                     sourceManager = SourceManager(
-                        sources = listOf(lyriconSource, superLyricSource, lyricInfoSource!!),
+                        sources = listOf(lyriconSource),
                         prefs = entry.prefs,
                         sink = sink,
                         prefKey = RootConstants.KEY_HOOK_LYRIC_SOURCE,
@@ -232,13 +223,6 @@ class HookEntry : XposedModule() {
                     }
                     entry.prefListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
                         when (key) {
-                            RootConstants.KEY_HOOK_LYRIC_SOURCE -> {
-                                val newSourceId = entry.prefs.getString(key, RootConstants.DEFAULT_HOOK_LYRIC_SOURCE) ?: RootConstants.DEFAULT_HOOK_LYRIC_SOURCE
-                                HookLogger.i("HookEntry", "歌词源切换: $newSourceId")
-                                android.os.Handler(android.os.Looper.getMainLooper()).post {
-                                    sourceManager?.switchSource(newSourceId)
-                                }
-                            }
                             RootConstants.KEY_HOOK_LYRIC_MODE -> {
                                 val newMode = entry.prefs.getInt(key, RootConstants.DEFAULT_HOOK_LYRIC_MODE)
                                 if (newMode == activeMode) return@OnSharedPreferenceChangeListener
