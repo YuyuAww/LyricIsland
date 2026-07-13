@@ -21,7 +21,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,17 +40,13 @@ import androidx.core.content.edit
 import androidx.core.net.toUri
 import com.lidesheng.hyperlyric.R
 import com.lidesheng.hyperlyric.common.UIConstants
-import com.lidesheng.hyperlyric.lyric.ConfigRepository
-import com.lidesheng.hyperlyric.lyric.commonMusicApps
 import com.lidesheng.hyperlyric.root.RootApplication
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.basic.Checkbox
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SnackbarDuration
@@ -155,7 +149,7 @@ fun SetupPage(onNavigateToMain: () -> Unit) {
                     }
                 )
                 1 -> if (workMode == 0) DisclaimerPage() else PermissionPage()
-                2 -> if (workMode == 0) Spacer(modifier = Modifier.fillMaxSize()) else WhitelistPage()
+                2 -> Spacer(modifier = Modifier.fillMaxSize())
                 3 -> CompletionPage(workMode = workMode)
             }
         }
@@ -281,75 +275,6 @@ fun PermissionPage() {
                             context.startActivity(intent)
                         }
                     )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun WhitelistPage() {
-    val context = LocalContext.current
-    val whitelistSet by ConfigRepository.whitelistState.collectAsState()
-
-    LaunchedEffect(Unit) {
-        ConfigRepository.initWhitelist(context)
-    }
-
-    Scaffold(
-        topBar = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = stringResource(R.string.title_add_whitelist),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 20.dp, bottom = 8.dp)
-                )
-
-                Text(
-                    text = stringResource(R.string.summary_add_whitelist),
-                    color = MiuixTheme.colorScheme.onSurfaceSecondary,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-            }
-        }
-    ) { padding ->
-        Card(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 12.dp)
-                .padding(bottom = 12.dp)
-        ) {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                commonMusicApps.forEach { (pkg: String, name: String) ->
-                    item(key = pkg) {
-                        val isChecked = whitelistSet.contains(pkg)
-                        BasicComponent(
-                            title = name,
-                            summary = pkg,
-                            onClick = {
-                                if (isChecked) {
-                                    ConfigRepository.removePackageFromWhitelist(context, pkg)
-                                } else {
-                                    ConfigRepository.addPackageToWhitelist(context, pkg)
-                                }
-                            },
-                            endActions = {
-                                Checkbox(
-                                    state = ToggleableState(isChecked),
-                                    onClick = {
-                                        val checked = !isChecked
-                                        if (checked) {
-                                            ConfigRepository.addPackageToWhitelist(context, pkg)
-                                        } else {
-                                            ConfigRepository.removePackageFromWhitelist(context, pkg)
-                                        }
-                                    }
-                                )
-                            }
-                        )
-                    }
                 }
             }
         }

@@ -2,19 +2,14 @@
 
 package com.lidesheng.hyperlyric.ui.page
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.os.Build
-import android.provider.Settings
 import top.yukonga.miuix.kmp.basic.SnackbarDuration
 import top.yukonga.miuix.kmp.basic.SnackbarHost
 import top.yukonga.miuix.kmp.basic.SnackbarHostState
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import com.lidesheng.hyperlyric.ui.component.SimpleDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.animation.AnimatedVisibility
@@ -52,8 +47,6 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.content.pm.PackageInfoCompat
 import com.lidesheng.hyperlyric.common.RootConstants
@@ -64,7 +57,6 @@ import com.lidesheng.hyperlyric.common.PrefsBridge
 import com.lidesheng.hyperlyric.root.RootApplication
 import com.lidesheng.hyperlyric.utils.MigrationData
 import com.lidesheng.hyperlyric.root.utils.ShellUtils
-import com.lidesheng.hyperlyric.service.LiveLyricService
 import com.lidesheng.hyperlyric.ui.navigation.LocalNavigator
 import com.lidesheng.hyperlyric.ui.navigation.Route
 import com.lidesheng.hyperlyric.ui.utils.rememberBlurBackdrop
@@ -96,9 +88,7 @@ import top.yukonga.miuix.kmp.icon.extended.Info
 import top.yukonga.miuix.kmp.icon.extended.Ok
 import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
-import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.window.WindowBottomSheet
 import top.yukonga.miuix.kmp.window.WindowDialog
 import androidx.core.net.toUri
 import java.io.BufferedReader
@@ -110,7 +100,6 @@ fun MainPage() {
     val navigator = LocalNavigator.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val sheetSnackbarHostState = remember { SnackbarHostState() }
 
     // --- pager ---
     val pagerState = rememberPagerState(pageCount = { 2 })
@@ -126,8 +115,6 @@ fun MainPage() {
     val msgPermissionGranted = stringResource(R.string.toast_permission_granted)
     val msgPermissionDenied = stringResource(R.string.toast_permission_denied)
     val msgNoRoot = stringResource(R.string.toast_no_root)
-    val msgPermissionNotGranted = stringResource(R.string.toast_permission_not_granted)
-    val msgOpenSettingsFailed = stringResource(R.string.toast_open_settings_failed)
     val msgXposedNotActive = stringResource(R.string.toast_xposed_module_not_active)
 
     // --- prefs & state ---
@@ -138,32 +125,9 @@ fun MainPage() {
     var enableSuperIsland by remember {
         mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_ENABLE_SUPER_ISLAND, RootConstants.DEFAULT_HOOK_ENABLE_SUPER_ISLAND))
     }
-    var enableDynamicIsland by remember {
-        mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_ENABLE_DYNAMIC_ISLAND, RootConstants.DEFAULT_HOOK_ENABLE_DYNAMIC_ISLAND))
-    }
-    var removeFocusWhitelist by remember {
-        mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_REMOVE_FOCUS_WHITELIST, RootConstants.DEFAULT_HOOK_REMOVE_FOCUS_WHITELIST))
-    }
-    var removeIslandWhitelist by remember {
-        mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_REMOVE_ISLAND_WHITELIST, RootConstants.DEFAULT_HOOK_REMOVE_ISLAND_WHITELIST))
-    }
 
     // --- dialogs ---
     var showRestartDialog by remember { mutableStateOf(false) }
-    var showPermissionSheet by remember { mutableStateOf(false) }
-
-    // --- permission launcher ---
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = if (isGranted) msgPermissionGranted else msgPermissionDenied,
-                    duration = SnackbarDuration.Custom(2000L)
-                )
-            }
-        }
-    )
 
     // --- pref listener ---
     val listener = remember {
@@ -173,8 +137,6 @@ fun MainPage() {
                     floatingNavBarEnabled = p.getBoolean(UIConstants.KEY_FLOATING_NAV_BAR, UIConstants.DEFAULT_FLOATING_NAV_BAR)
                 RootConstants.KEY_HOOK_ENABLE_SUPER_ISLAND ->
                     enableSuperIsland = p.getBoolean(RootConstants.KEY_HOOK_ENABLE_SUPER_ISLAND, RootConstants.DEFAULT_HOOK_ENABLE_SUPER_ISLAND)
-                RootConstants.KEY_HOOK_ENABLE_DYNAMIC_ISLAND ->
-                    enableDynamicIsland = p.getBoolean(RootConstants.KEY_HOOK_ENABLE_DYNAMIC_ISLAND, RootConstants.DEFAULT_HOOK_ENABLE_DYNAMIC_ISLAND)
             }
         }
     }
@@ -183,14 +145,6 @@ fun MainPage() {
         prefs.registerOnSharedPreferenceChangeListener(listener)
         onDispose {
             prefs.unregisterOnSharedPreferenceChangeListener(listener)
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        val hasListenerPermission = NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
-        val isDynamicIslandEnabled = prefs.getBoolean(RootConstants.KEY_HOOK_ENABLE_DYNAMIC_ISLAND, RootConstants.DEFAULT_HOOK_ENABLE_DYNAMIC_ISLAND)
-        if (hasListenerPermission && isDynamicIslandEnabled) {
-            LiveLyricService.ensureListenerBound(context)
         }
     }
 
@@ -218,86 +172,6 @@ fun MainPage() {
             enableSuperIsland = false
             prefs.edit { putBoolean(RootConstants.KEY_HOOK_ENABLE_SUPER_ISLAND, false) }
             PrefsBridge.putBoolean(RootConstants.KEY_HOOK_ENABLE_SUPER_ISLAND, false)
-        }
-    } }
-
-    val toggleDynamicIsland: (Boolean) -> Unit = remember { { isChecked ->
-        if (isChecked) {
-            val hasPostNotification = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-            val hasListenerPermission = NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
-            if (hasPostNotification && hasListenerPermission) {
-                enableDynamicIsland = true
-                prefs.edit { putBoolean(RootConstants.KEY_HOOK_ENABLE_DYNAMIC_ISLAND, true) }
-                PrefsBridge.putBoolean(RootConstants.KEY_HOOK_ENABLE_DYNAMIC_ISLAND, true)
-                LiveLyricService.ensureListenerBound(context)
-            } else {
-                showPermissionSheet = true
-            }
-        } else {
-            enableDynamicIsland = false
-            prefs.edit { putBoolean(RootConstants.KEY_HOOK_ENABLE_DYNAMIC_ISLAND, false) }
-            PrefsBridge.putBoolean(RootConstants.KEY_HOOK_ENABLE_DYNAMIC_ISLAND, false)
-        }
-    } }
-
-    val toggleRemoveFocusWhitelist: (Boolean) -> Unit = remember { { checked ->
-        if (checked) {
-            if (RootApplication.xposedService != null) {
-                removeFocusWhitelist = true
-                prefs.edit { putBoolean(RootConstants.KEY_HOOK_REMOVE_FOCUS_WHITELIST, true) }
-                PrefsBridge.putBoolean(RootConstants.KEY_HOOK_REMOVE_FOCUS_WHITELIST, true)
-            } else {
-                scope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = msgXposedNotActive,
-                        duration = SnackbarDuration.Custom(2000L)
-                    )
-                }
-            }
-        } else {
-            removeFocusWhitelist = false
-            prefs.edit { putBoolean(RootConstants.KEY_HOOK_REMOVE_FOCUS_WHITELIST, false) }
-            PrefsBridge.putBoolean(RootConstants.KEY_HOOK_REMOVE_FOCUS_WHITELIST, false)
-        }
-    } }
-
-    val toggleRemoveIslandWhitelist: (Boolean) -> Unit = remember { { checked ->
-        if (checked) {
-            if (RootApplication.xposedService != null) {
-                removeIslandWhitelist = true
-                prefs.edit { putBoolean(RootConstants.KEY_HOOK_REMOVE_ISLAND_WHITELIST, true) }
-                PrefsBridge.putBoolean(RootConstants.KEY_HOOK_REMOVE_ISLAND_WHITELIST, true)
-            } else {
-                scope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = msgXposedNotActive,
-                        duration = SnackbarDuration.Custom(2000L)
-                    )
-                }
-            }
-        } else {
-            removeIslandWhitelist = false
-            prefs.edit { putBoolean(RootConstants.KEY_HOOK_REMOVE_ISLAND_WHITELIST, false) }
-            PrefsBridge.putBoolean(RootConstants.KEY_HOOK_REMOVE_ISLAND_WHITELIST, false)
-        }
-    } }
-
-    val confirmPermissionSheet: () -> Unit = remember { {
-        val hasPostNotification = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-        val hasListenerPermission = NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
-        if (hasPostNotification && hasListenerPermission) {
-            showPermissionSheet = false
-            enableDynamicIsland = true
-            prefs.edit { putBoolean(RootConstants.KEY_HOOK_ENABLE_DYNAMIC_ISLAND, true) }
-            PrefsBridge.putBoolean(RootConstants.KEY_HOOK_ENABLE_DYNAMIC_ISLAND, true)
-            LiveLyricService.ensureListenerBound(context)
-        } else {
-            scope.launch {
-                sheetSnackbarHostState.showSnackbar(
-                    message = msgPermissionNotGranted,
-                    duration = SnackbarDuration.Custom(2000L)
-                )
-            }
         }
     } }
 
@@ -508,15 +382,8 @@ fun MainPage() {
                         onQuoteLongPress = { navigator.navigate(Route.Poetry) },
                         enableSuperIsland = enableSuperIsland,
                         onSuperIslandToggle = toggleSuperIsland,
-                        enableDynamicIsland = enableDynamicIsland,
-                        onDynamicIslandToggle = toggleDynamicIsland,
                         onSuperIslandConfigClick = { navigator.navigate(Route.HookSettings) },
-                        onDynamicIslandConfigClick = { navigator.navigate(Route.DynamicIslandNotification) },
                         onRestartClick = { showRestartDialog = true },
-                        removeFocusWhitelist = removeFocusWhitelist,
-                        onRemoveFocusWhitelistToggle = toggleRemoveFocusWhitelist,
-                        removeIslandWhitelist = removeIslandWhitelist,
-                        onRemoveIslandWhitelistToggle = toggleRemoveIslandWhitelist,
                         onAppSettingsClick = { navigator.navigate(Route.Settings) },
                     )
                 } else {
@@ -532,79 +399,6 @@ fun MainPage() {
                     )
                 }
             }
-        }
-    }
-
-    WindowBottomSheet(
-        show = showPermissionSheet,
-        title = stringResource(R.string.sheet_permission_title),
-        allowDismiss = false,
-        backgroundColor = MiuixTheme.colorScheme.surface,
-        startAction = {
-            IconButton(onClick = { showPermissionSheet = false }) {
-                Icon(
-                    imageVector = MiuixIcons.Close,
-                    contentDescription = stringResource(R.string.close),
-                    tint = MiuixTheme.colorScheme.onBackground
-                )
-            }
-        },
-        endAction = {
-            IconButton(onClick = confirmPermissionSheet) {
-                Icon(
-                    imageVector = MiuixIcons.Ok,
-                    contentDescription = stringResource(R.string.confirm),
-                    tint = MiuixTheme.colorScheme.onBackground
-                )
-            }
-        },
-        onDismissRequest = { showPermissionSheet = false }
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .layout { measurable, constraints ->
-                    val paddingPx = 24.dp.roundToPx()
-                    val placeable = measurable.measure(
-                        constraints.copy(maxWidth = constraints.maxWidth + paddingPx * 2)
-                    )
-                    layout(constraints.maxWidth, placeable.height) {
-                        placeable.place(-paddingPx, 0)
-                    }
-                }
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 40.dp)
-            ) {
-                Card(modifier = Modifier.padding(horizontal = 12.dp).fillMaxWidth()) {
-                    ArrowPreference(
-                        title = stringResource(R.string.title_permission_post_notification),
-                        onClick = { notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) }
-                    )
-                    ArrowPreference(
-                        title = stringResource(R.string.title_permission_listener),
-                        onClick = {
-                            try {
-                                val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-                                context.startActivity(intent)
-                            } catch (_: Exception) {
-                                scope.launch {
-                                    sheetSnackbarHostState.showSnackbar(
-                                        message = msgOpenSettingsFailed,
-                                        duration = SnackbarDuration.Custom(2000L)
-                                    )
-                                }
-                            }
-                        }
-                    )
-                }
-            }
-            SnackbarHost(
-                state = sheetSnackbarHostState,
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
         }
     }
 }

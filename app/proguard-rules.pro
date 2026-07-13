@@ -1,6 +1,5 @@
 -keep class com.lidesheng.hyperlyric.root.** { *; }
 -keep class com.lidesheng.hyperlyric.common.RootConstants { *; }
--keep class com.lidesheng.hyperlyric.common.ServiceConstants { *; }
 -keep class com.lidesheng.hyperlyric.common.UIConstants { *; }
 
 # 保护 libxposed 接口

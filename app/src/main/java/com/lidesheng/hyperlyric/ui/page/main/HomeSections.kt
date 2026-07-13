@@ -26,7 +26,6 @@ fun LazyListScope.homePageSections(
     enableDynamicIsland: Boolean,
     onDynamicIslandToggle: (Boolean) -> Unit,
     onSuperIslandConfigClick: () -> Unit,
-    onDynamicIslandConfigClick: () -> Unit,
     onRestartClick: () -> Unit,
     removeFocusWhitelist: Boolean,
     onRemoveFocusWhitelistToggle: (Boolean) -> Unit,
@@ -77,12 +76,7 @@ fun LazyListScope.homePageSections(
                     checked = enableDynamicIsland,
                     onCheckedChange = onDynamicIslandToggle,
                 )
-                AnimatedVisibility(visible = enableDynamicIsland) {
-                    ArrowPreference(
-                        title = stringResource(R.string.title_dynamic_island_config),
-                        onClick = onDynamicIslandConfigClick,
-                    )
-                }
+
             }
         }
     }

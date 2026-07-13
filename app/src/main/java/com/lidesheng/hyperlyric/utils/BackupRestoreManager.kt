@@ -19,7 +19,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import com.lidesheng.hyperlyric.common.ServiceConstants
 import com.lidesheng.hyperlyric.common.UIConstants
 
 object BackupRestoreManager {
@@ -60,10 +59,7 @@ object BackupRestoreManager {
                     val value = config.get(key)
                     if (key == "key_send_normal_notification" || key == "key_send_focus_notification" || key == "key_persistent_foreground"
                         || key.startsWith("key_hook_ai_trans_")) continue
-                    if (key == ServiceConstants.KEY_NOTIFICATION_WHITELIST) {
-                        val raw = value.toString()
-                        val set = if (raw.isBlank()) emptySet() else raw.split(",").map { it.trim() }.filter { it.isNotEmpty() }.toSet()
-                        putStringSet(key, set)
+                    if (key == "key_notification_whitelist_packages") {
                         continue
                     }
                     when (value) {
