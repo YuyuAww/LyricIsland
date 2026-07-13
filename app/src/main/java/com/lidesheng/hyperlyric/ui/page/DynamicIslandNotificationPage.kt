@@ -75,14 +75,6 @@ fun DynamicIslandNotificationPage() {
     val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var lyricSource by remember {
-        mutableIntStateOf(
-            prefs.getInt(
-                ServiceConstants.KEY_SERVICE_LYRIC_SOURCE,
-                ServiceConstants.DEFAULT_SERVICE_LYRIC_SOURCE
-            )
-        )
-    }
     var limitWidthEnabled by remember {
         mutableStateOf(
             prefs.getBoolean(
@@ -464,11 +456,6 @@ fun DynamicIslandNotificationPage() {
                                         }
                                     }
                                 }
-                            },
-                            lyricSource = lyricSource,
-                            onLyricSourceChange = { value ->
-                                lyricSource = value
-                                prefs.edit { putInt(ServiceConstants.KEY_SERVICE_LYRIC_SOURCE, value) }
                             },
                             highlightColorEnabled = highlightColorEnabled,
                             onHighlightColorToggle = { checked ->

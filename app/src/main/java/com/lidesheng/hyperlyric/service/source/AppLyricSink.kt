@@ -35,7 +35,7 @@ class AppLyricSink(
     private var cachedLyricLines: List<LrcLine>? = null
     private var cachedLyricHash: Int = 0
 
-    private val sourceManager = ServiceSourceManager(context)
+    private val autoSource = AutoLyricSource(LyricInfoLyricSource(), MetadataLrcLyricSource())
     private val lyricScheduler = LyricScheduler(context, scope, this)
 
     private var collectJob: Job? = null
@@ -163,22 +163,15 @@ class AppLyricSink(
         isCurrentlyPlaying = data.isPlaying
         currentSyncData = data
 
-        val lyricSource = sp.getInt(ServiceConstants.KEY_SERVICE_LYRIC_SOURCE, ServiceConstants.DEFAULT_SERVICE_LYRIC_SOURCE)
-
         // 2. 本地元数据歌词获取和解析（如果在歌曲生命周期中延迟到达或需要重新解析）
-        val source = sourceManager.getSource(lyricSource)
-        val currentRawLyric = when (lyricSource) {
-            ServiceConstants.LYRIC_SOURCE_AUTO -> data.lyricInfoRaw ?: data.lyricRaw
-            ServiceConstants.LYRIC_SOURCE_LYRIC_INFO -> data.lyricInfoRaw
-            ServiceConstants.LYRIC_SOURCE_LRC -> data.lyricRaw
-            else -> null
-        }
+        val source = autoSource
+        val currentRawLyric = data.lyricInfoRaw ?: data.lyricRaw
         val currentRawHash = currentRawLyric?.hashCode() ?: 0
 
         val needFetchLyrics = (cachedLyricLines == null && fetchJob == null) ||
                               (currentRawLyric != null && currentRawHash != cachedLyricHash)
 
-        if (needFetchLyrics && lyricSource != ServiceConstants.LYRIC_SOURCE_TITLE) {
+        if (needFetchLyrics) {
             fetchJob?.cancel()
             fetchJob = scope.launch(Dispatchers.IO) {
                 val rawLines = source.getLyrics(data)
@@ -205,9 +198,6 @@ class AppLyricSink(
                     }
                 }
             }
-        } else if (lyricSource == ServiceConstants.LYRIC_SOURCE_TITLE && cachedLyricLines == null) {
-            // 如果是 Title 模式本身，切歌后立刻标记 cachedLyricLines 为 emptyList 以终止“获取中”挂起态，走静态标题通道
-            cachedLyricLines = emptyList()
         }
 
         // 3. 通知分发与调度器控制
@@ -218,23 +208,13 @@ class AppLyricSink(
                 lyricScheduler.updateSyncData(data)
                 lyricScheduler.startSchedulers(isSongChanged, playStateChanged)
             } else {
-                // 静态无歌词状态，或者 Title 模式
-                if (lyricSource == ServiceConstants.LYRIC_SOURCE_TITLE) {
-                    val titleChanged = data.dynamicTitle != lastDispatchedLrc
-                    if (isSongChanged || playStateChanged || titleChanged) {
-                        lastDispatchedLrc = data.dynamicTitle
-                        notificationPresenter.dispatchLyricContent(data.dynamicTitle, data, false)
-                        notificationPresenter.updateState(DynamicLyricData.currentState, force = isSongChanged || playStateChanged)
-                    }
-                } else {
-                    // “歌词源无数据”静态通知：仅在状态改变或歌曲切换时发送，不跑 Ticker 调度器
-                    val noLyricText = context.getString(com.lidesheng.hyperlyric.R.string.no_lyric_data)
-                    val textChanged = noLyricText != lastDispatchedLrc
-                    if (isSongChanged || playStateChanged || textChanged) {
-                        lastDispatchedLrc = noLyricText
-                        notificationPresenter.dispatchLyricContent(noLyricText, data, false)
-                        notificationPresenter.updateState(DynamicLyricData.currentState, force = isSongChanged || playStateChanged)
-                    }
+                // “歌词源无数据”静态通知：仅在状态改变或歌曲切换时发送，不跑 Ticker 调度器
+                val noLyricText = context.getString(com.lidesheng.hyperlyric.R.string.no_lyric_data)
+                val textChanged = noLyricText != lastDispatchedLrc
+                if (isSongChanged || playStateChanged || textChanged) {
+                    lastDispatchedLrc = noLyricText
+                    notificationPresenter.dispatchLyricContent(noLyricText, data, false)
+                    notificationPresenter.updateState(DynamicLyricData.currentState, force = isSongChanged || playStateChanged)
                 }
 
                 // 进度条依然可以在后台运行（若有配置开启），但歌词 ticker 不会启动

@@ -84,16 +84,6 @@ fun LyricSettingsPage() {
     var customFontPath by remember { mutableStateOf(prefs.getString(RootConstants.KEY_HOOK_CUSTOM_FONT_PATH, null) ?: "") }
     var centerLyric by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_CENTER_LYRIC, RootConstants.DEFAULT_HOOK_CENTER_LYRIC)) }
     val lyricMode by remember { mutableIntStateOf(prefs.getInt(RootConstants.KEY_HOOK_LYRIC_MODE, RootConstants.DEFAULT_HOOK_LYRIC_MODE)) }
-    val lyricSource by remember { mutableStateOf(prefs.getString(RootConstants.KEY_HOOK_LYRIC_SOURCE, RootConstants.DEFAULT_HOOK_LYRIC_SOURCE) ?: "lyricon") }
-
-    var aiTransEnabled by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_AI_TRANS_ENABLE, RootConstants.DEFAULT_HOOK_AI_TRANS_ENABLE)) }
-    var autoIgnoreChinese by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_AI_TRANS_AUTO_IGNORE_CHINESE, RootConstants.DEFAULT_HOOK_AI_TRANS_AUTO_IGNORE_CHINESE)) }
-    var skipExistingTranslation by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_AI_TRANS_SKIP_EXISTING_TRANSLATION, RootConstants.DEFAULT_HOOK_AI_TRANS_SKIP_EXISTING_TRANSLATION)) }
-    var apiKey by remember { mutableStateOf(prefs.getString(RootConstants.KEY_HOOK_AI_TRANS_API_KEY, "") ?: "") }
-    var model by remember { mutableStateOf(prefs.getString(RootConstants.KEY_HOOK_AI_TRANS_MODEL, RootConstants.DEFAULT_HOOK_AI_TRANS_MODEL) ?: RootConstants.DEFAULT_HOOK_AI_TRANS_MODEL) }
-    var baseUrl by remember { mutableStateOf(prefs.getString(RootConstants.KEY_HOOK_AI_TRANS_BASE_URL, RootConstants.DEFAULT_HOOK_AI_TRANS_BASE_URL) ?: RootConstants.DEFAULT_HOOK_AI_TRANS_BASE_URL) }
-    var targetLang by remember { mutableStateOf(prefs.getString(RootConstants.KEY_HOOK_AI_TRANS_TARGET_LANG, RootConstants.DEFAULT_HOOK_AI_TRANS_TARGET_LANG) ?: RootConstants.DEFAULT_HOOK_AI_TRANS_TARGET_LANG) }
-    var prompt by remember { mutableStateOf(prefs.getString(RootConstants.KEY_HOOK_AI_TRANS_PROMPT, RootConstants.DEFAULT_HOOK_AI_TRANS_PROMPT) ?: RootConstants.DEFAULT_HOOK_AI_TRANS_PROMPT) }
 
     var wordMotionEnabled by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_WORD_MOTION_ENABLED, RootConstants.DEFAULT_HOOK_WORD_MOTION_ENABLED)) }
     var wordMotionCjkLift by remember { mutableFloatStateOf(prefs.getFloat(RootConstants.KEY_HOOK_WORD_MOTION_CJK_LIFT, RootConstants.DEFAULT_HOOK_WORD_MOTION_CJK_LIFT)) }
@@ -112,12 +102,6 @@ fun LyricSettingsPage() {
     var showMarqueeLoopDialog by remember { mutableStateOf(false) }
     var showTextSizeRatioDialog by remember { mutableStateOf(false) }
     var showFontPathDialog by remember { mutableStateOf(false) }
-
-    var showPromptDialog by remember { mutableStateOf(false) }
-    var showApiKeyDialog by remember { mutableStateOf(false) }
-    var showModelDialog by remember { mutableStateOf(false) }
-    var showBaseUrlDialog by remember { mutableStateOf(false) }
-    var showTargetLangDialog by remember { mutableStateOf(false) }
 
     var showWordMotionCjkLiftDialog by remember { mutableStateOf(false) }
     var showWordMotionCjkWaveDialog by remember { mutableStateOf(false) }
@@ -154,12 +138,6 @@ fun LyricSettingsPage() {
 
     val basicLazyListState = rememberLazyListState()
     val advancedLazyListState = rememberLazyListState()
-
-    TextInputDialog(show = showApiKeyDialog, title = stringResource(id = R.string.label_ai_trans_api_key), initialValue = apiKey, onDismiss = { showApiKeyDialog = false }, onConfirm = { apiKey = it; saveConfig(RootConstants.KEY_HOOK_AI_TRANS_API_KEY, it) })
-    TextInputDialog(show = showModelDialog, title = stringResource(id = R.string.label_ai_trans_model), initialValue = model, onDismiss = { showModelDialog = false }, onConfirm = { model = it; saveConfig(RootConstants.KEY_HOOK_AI_TRANS_MODEL, it) })
-    TextInputDialog(show = showBaseUrlDialog, title = stringResource(id = R.string.label_ai_trans_base_url), initialValue = baseUrl, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri), onDismiss = { showBaseUrlDialog = false }, onConfirm = { baseUrl = it; saveConfig(RootConstants.KEY_HOOK_AI_TRANS_BASE_URL, it) })
-    TextInputDialog(show = showTargetLangDialog, title = stringResource(id = R.string.label_ai_trans_target_lang), initialValue = targetLang, onDismiss = { showTargetLangDialog = false }, onConfirm = { targetLang = it; saveConfig(RootConstants.KEY_HOOK_AI_TRANS_TARGET_LANG, it) })
-    TextInputDialog(show = showPromptDialog, title = stringResource(R.string.title_custom_prompt), initialValue = prompt, onDismiss = { showPromptDialog = false }, onConfirm = { prompt = it; saveConfig(RootConstants.KEY_HOOK_AI_TRANS_PROMPT, it) })
 
     FloatInputDialog(show = showWordMotionCjkLiftDialog, title = stringResource(id = R.string.title_word_motion_cjk_lift), label = stringResource(id = R.string.label_word_motion_lift_range), initialValue = wordMotionCjkLift, min = 0f, max = 0.2f, onDismiss = { showWordMotionCjkLiftDialog = false }, onConfirm = { value -> wordMotionCjkLift = value; saveConfig(RootConstants.KEY_HOOK_WORD_MOTION_CJK_LIFT, value) })
     FloatInputDialog(show = showWordMotionCjkWaveDialog, title = stringResource(id = R.string.title_word_motion_cjk_wave), label = stringResource(id = R.string.label_word_motion_wave_range), initialValue = wordMotionCjkWave, min = 0f, max = 10f, onDismiss = { showWordMotionCjkWaveDialog = false }, onConfirm = { value -> wordMotionCjkWave = value; saveConfig(RootConstants.KEY_HOOK_WORD_MOTION_CJK_WAVE, value) })
@@ -311,7 +289,6 @@ fun LyricSettingsPage() {
                             lazyListState = advancedLazyListState,
                             topAppBarScrollBehavior = topAppBarScrollBehavior,
                             contentPadding = contentPadding,
-                            lyricSource = lyricSource,
                             lyricMode = lyricMode,
                             gradientStyle = gradientStyle,
                             onGradientStyleChange = { gradientStyle = it; saveConfig(RootConstants.KEY_HOOK_GRADIENT_PROGRESS, it) },
@@ -350,23 +327,7 @@ fun LyricSettingsPage() {
                                 }
                             },
                             nextLyricLine = nextLyricLine,
-                            onNextLyricLineChange = { nextLyricLine = it; saveConfig(RootConstants.KEY_HOOK_NEXT_LYRIC_LINE, it) },
-                            aiTransEnabled = aiTransEnabled,
-                            onAiTransEnabledChange = { aiTransEnabled = it; saveConfig(RootConstants.KEY_HOOK_AI_TRANS_ENABLE, it) },
-                            autoIgnoreChinese = autoIgnoreChinese,
-                            onAutoIgnoreChineseChange = { autoIgnoreChinese = it; saveConfig(RootConstants.KEY_HOOK_AI_TRANS_AUTO_IGNORE_CHINESE, it) },
-                            skipExistingTranslation = skipExistingTranslation,
-                            onSkipExistingTranslationChange = { skipExistingTranslation = it; saveConfig(RootConstants.KEY_HOOK_AI_TRANS_SKIP_EXISTING_TRANSLATION, it) },
-                            targetLang = targetLang,
-                            onTargetLangClick = { showTargetLangDialog = true },
-                            apiKey = apiKey,
-                            onApiKeyClick = { showApiKeyDialog = true },
-                            model = model,
-                            onModelClick = { showModelDialog = true },
-                            baseUrl = baseUrl,
-                            onBaseUrlClick = { showBaseUrlDialog = true },
-                            prompt = prompt,
-                            onPromptClick = { showPromptDialog = true }
+                            onNextLyricLineChange = { nextLyricLine = it; saveConfig(RootConstants.KEY_HOOK_NEXT_LYRIC_LINE, it) }
                         )
                     }
                 }

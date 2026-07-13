@@ -13,7 +13,6 @@ fun LyricAdvancedTab(
     lazyListState: LazyListState,
     topAppBarScrollBehavior: ScrollBehavior,
     contentPadding: PaddingValues,
-    lyricSource: String,
     lyricMode: Int,
     gradientStyle: Boolean,
     onGradientStyleChange: (Boolean) -> Unit,
@@ -38,23 +37,7 @@ fun LyricAdvancedTab(
     swapTranslation: Boolean,
     onSwapTranslationChange: (Boolean) -> Unit,
     nextLyricLine: Boolean,
-    onNextLyricLineChange: (Boolean) -> Unit,
-    aiTransEnabled: Boolean,
-    onAiTransEnabledChange: (Boolean) -> Unit,
-    autoIgnoreChinese: Boolean,
-    onAutoIgnoreChineseChange: (Boolean) -> Unit,
-    skipExistingTranslation: Boolean,
-    onSkipExistingTranslationChange: (Boolean) -> Unit,
-    targetLang: String,
-    onTargetLangClick: () -> Unit,
-    apiKey: String,
-    onApiKeyClick: () -> Unit,
-    model: String,
-    onModelClick: () -> Unit,
-    baseUrl: String,
-    onBaseUrlClick: () -> Unit,
-    prompt: String,
-    onPromptClick: () -> Unit
+    onNextLyricLineChange: (Boolean) -> Unit
 ) {
     LazyColumn(
         state = lazyListState,
@@ -66,7 +49,6 @@ fun LyricAdvancedTab(
         contentPadding = contentPadding,
     ) {
         advancedSections(
-            lyricSource = lyricSource,
             lyricMode = lyricMode,
             gradientStyle = gradientStyle,
             onGradientStyleChange = onGradientStyleChange,
@@ -91,23 +73,7 @@ fun LyricAdvancedTab(
             swapTranslation = swapTranslation,
             onSwapTranslationChange = onSwapTranslationChange,
             nextLyricLine = nextLyricLine,
-            onNextLyricLineChange = onNextLyricLineChange,
-            aiTransEnabled = aiTransEnabled,
-            onAiTransEnabledChange = onAiTransEnabledChange,
-            autoIgnoreChinese = autoIgnoreChinese,
-            onAutoIgnoreChineseChange = onAutoIgnoreChineseChange,
-            skipExistingTranslation = skipExistingTranslation,
-            onSkipExistingTranslationChange = onSkipExistingTranslationChange,
-            targetLang = targetLang,
-            onTargetLangClick = onTargetLangClick,
-            apiKey = apiKey,
-            onApiKeyClick = onApiKeyClick,
-            model = model,
-            onModelClick = onModelClick,
-            baseUrl = baseUrl,
-            onBaseUrlClick = onBaseUrlClick,
-            prompt = prompt,
-            onPromptClick = onPromptClick
+            onNextLyricLineChange = onNextLyricLineChange
         )
     }
 }

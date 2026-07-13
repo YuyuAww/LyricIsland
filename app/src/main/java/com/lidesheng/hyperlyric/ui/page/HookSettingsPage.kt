@@ -54,9 +54,6 @@ fun HookSettingsPage() {
     val barColor = if (blurActive) Color.Transparent else MiuixTheme.colorScheme.surface
     val topAppBarScrollBehavior = MiuixScrollBehavior()
     val prefs = remember { context.getSharedPreferences(UIConstants.PREF_NAME, Context.MODE_PRIVATE) }
-    var lyricSource by remember {
-        mutableStateOf(prefs.getString(RootConstants.KEY_HOOK_LYRIC_SOURCE, RootConstants.DEFAULT_HOOK_LYRIC_SOURCE) ?: "lyricon")
-    }
     Scaffold(
         topBar = {
             BlurredBar(backdrop, blurActive) {
@@ -94,16 +91,13 @@ fun HookSettingsPage() {
                 ),
                 contentPadding = contentPadding,
             ) {
-                hookSettingsSections(lyricSource, onLyricSourceChange = { lyricSource = it })
+                hookSettingsSections()
             }
         }
     }
 }
 
-private fun LazyListScope.hookSettingsSections(
-    lyricSource: String,
-    onLyricSourceChange: (String) -> Unit
-) {
+private fun LazyListScope.hookSettingsSections() {
     item(key = "lyric_mode") {
         val context = LocalContext.current
         val prefs = remember { context.getSharedPreferences(UIConstants.PREF_NAME, Context.MODE_PRIVATE) }
@@ -112,12 +106,6 @@ private fun LazyListScope.hookSettingsSections(
             stringResource(R.string.lyric_mode_verbatim),
             stringResource(R.string.lyric_mode_separated)
         )
-        val sourceOptions = listOf(
-            stringResource(R.string.lyric_source_lyricon),
-            stringResource(R.string.lyric_source_superlyric),
-            stringResource(R.string.lyric_source_lyricinfo)
-        )
-        val sourceIds = listOf("lyricon", "superlyric", "lyricinfo")
         Card(modifier = Modifier.padding(horizontal = 12.dp).fillMaxWidth()) {
             OverlayDropdownPreference(
                 title = stringResource(R.string.title_lyric_mode),
@@ -129,17 +117,6 @@ private fun LazyListScope.hookSettingsSections(
                     PrefsBridge.putInt(RootConstants.KEY_HOOK_LYRIC_MODE, index)
                 }
             )
-            OverlayDropdownPreference(
-                title = stringResource(R.string.title_lyric_source),
-                items = sourceOptions,
-                selectedIndex = sourceIds.indexOf(lyricSource).coerceAtLeast(0),
-                onSelectedIndexChange = { index ->
-                    val newSource = sourceIds[index]
-                    onLyricSourceChange(newSource)
-                    prefs.edit { putString(RootConstants.KEY_HOOK_LYRIC_SOURCE, newSource) }
-                    PrefsBridge.putString(RootConstants.KEY_HOOK_LYRIC_SOURCE, newSource)
-                }
-            )
         }
     }
     item(key = "custom_config_title") {
@@ -147,6 +124,10 @@ private fun LazyListScope.hookSettingsSections(
     }
     item(key = "custom_config_content") {
         val navigator = LocalNavigator.current
+        val context = LocalContext.current
+        val prefs = remember { context.getSharedPreferences(UIConstants.PREF_NAME, Context.MODE_PRIVATE) }
+        // 从配置中读取歌词源，用于判断是否显示歌词提供商入口
+        val lyricSource by remember { mutableStateOf(prefs.getString(RootConstants.KEY_HOOK_LYRIC_SOURCE, RootConstants.DEFAULT_HOOK_LYRIC_SOURCE) ?: "lyricon") }
         Card(modifier = Modifier.padding(horizontal = 12.dp).fillMaxWidth()) {
             Column {
                 ArrowPreference(title = stringResource(R.string.title_super_island), onClick = { navigator.navigate(Route.SuperIslandSettings) })

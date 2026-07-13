@@ -41,8 +41,6 @@ fun LyricNotificationConfigTab(
     onNormalNotificationTitleStyleChange: (Int) -> Unit,
     onAutostartClick: () -> Unit,
     onBatteryOptimizationClick: () -> Unit,
-    lyricSource: Int,
-    onLyricSourceChange: (Int) -> Unit,
     bypassFocusLimitEnabled: Boolean,
     onBypassFocusLimitToggle: (Boolean) -> Unit
 ) {
@@ -84,8 +82,6 @@ fun LyricNotificationConfigTab(
             onNormalNotificationTitleStyleChange = onNormalNotificationTitleStyleChange,
             onAutostartClick = onAutostartClick,
             onBatteryOptimizationClick = onBatteryOptimizationClick,
-            lyricSource = lyricSource,
-            onLyricSourceChange = onLyricSourceChange,
             bypassFocusLimitEnabled = bypassFocusLimitEnabled,
             onBypassFocusLimitToggle = onBypassFocusLimitToggle
         )

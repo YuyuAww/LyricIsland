@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.lidesheng.hyperlyric.R
-import com.lidesheng.hyperlyric.common.ServiceConstants
 import com.lidesheng.hyperlyric.lyric.commonMusicApps
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
@@ -61,8 +60,6 @@ fun LazyListScope.configSections(
     onNormalNotificationTitleStyleChange: (Int) -> Unit,
     onAutostartClick: () -> Unit,
     onBatteryOptimizationClick: () -> Unit,
-    lyricSource: Int,
-    onLyricSourceChange: (Int) -> Unit,
     bypassFocusLimitEnabled: Boolean,
     onBypassFocusLimitToggle: (Boolean) -> Unit
 ) {
@@ -73,44 +70,6 @@ fun LazyListScope.configSections(
                 .padding(bottom = 12.dp).fillMaxWidth()
         ) {
             Column {
-                val lyricSourceOptions = remember {
-                    listOf(
-                        R.string.option_service_lyric_source_auto,
-                        R.string.option_service_lyric_source_lyricinfo,
-                        R.string.option_service_lyric_source_lyric,
-                        R.string.option_service_lyric_source_title
-                    )
-                }.map { stringResource(id = it) }
-
-                val dropdownToValue: (Int) -> Int = { index ->
-                    when (index) {
-                        0 -> ServiceConstants.LYRIC_SOURCE_AUTO
-                        1 -> ServiceConstants.LYRIC_SOURCE_LYRIC_INFO
-                        2 -> ServiceConstants.LYRIC_SOURCE_LRC
-                        3 -> ServiceConstants.LYRIC_SOURCE_TITLE
-                        else -> ServiceConstants.LYRIC_SOURCE_AUTO
-                    }
-                }
-
-                val valueToDropdown: (Int) -> Int = { value ->
-                    when (value) {
-                        ServiceConstants.LYRIC_SOURCE_AUTO -> 0
-                        ServiceConstants.LYRIC_SOURCE_LYRIC_INFO -> 1
-                        ServiceConstants.LYRIC_SOURCE_LRC -> 2
-                        ServiceConstants.LYRIC_SOURCE_TITLE -> 3
-                        else -> 0
-                    }
-                }
-
-                WindowDropdownPreference(
-                    title = stringResource(R.string.title_service_lyric_source),
-                    items = lyricSourceOptions,
-                    selectedIndex = valueToDropdown(lyricSource),
-                    onSelectedIndexChange = { index ->
-                        onLyricSourceChange(dropdownToValue(index))
-                    }
-                )
-
                 val notificationTypeOptions = remember {
                     listOf(R.string.option_notification_live, R.string.option_notification_focus)
                 }.map { stringResource(id = it) }
