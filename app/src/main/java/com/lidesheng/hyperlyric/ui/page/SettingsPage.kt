@@ -150,10 +150,6 @@ private fun LazyListScope.settingsSections(
                 SwitchPreference(title = stringResource(R.string.title_floating_nav), checked = floatingNavBarEnabled, onCheckedChange = { floatingNavBarEnabled = it; prefs.edit { putBoolean(UIConstants.KEY_FLOATING_NAV_BAR, it) } })
                 var excludeFromRecents by remember { mutableStateOf(prefs.getBoolean(UIConstants.KEY_EXCLUDE_FROM_RECENTS, UIConstants.DEFAULT_EXCLUDE_FROM_RECENTS)) }
                 SwitchPreference(title = stringResource(R.string.title_exclude_from_recents), checked = excludeFromRecents, onCheckedChange = { excludeFromRecents = it; prefs.edit { putBoolean(UIConstants.KEY_EXCLUDE_FROM_RECENTS, it) }; setExcludeFromRecents(context, it) })
-                var displayTranslation by remember { mutableStateOf(prefs.getBoolean(UIConstants.KEY_DISPLAY_TRANSLATION, UIConstants.DEFAULT_DISPLAY_TRANSLATION)) }
-                SwitchPreference(title = stringResource(R.string.title_display_translation), checked = displayTranslation, onCheckedChange = { displayTranslation = it; prefs.edit { putBoolean(UIConstants.KEY_DISPLAY_TRANSLATION, it) } })
-                var displayRoma by remember { mutableStateOf(prefs.getBoolean(UIConstants.KEY_DISPLAY_ROMA, UIConstants.DEFAULT_DISPLAY_ROMA)) }
-                SwitchPreference(title = stringResource(R.string.title_display_roma), checked = displayRoma, onCheckedChange = { displayRoma = it; prefs.edit { putBoolean(UIConstants.KEY_DISPLAY_ROMA, it) } })
             }
         }
     }

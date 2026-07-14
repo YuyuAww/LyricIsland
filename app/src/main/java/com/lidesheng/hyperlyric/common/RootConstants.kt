@@ -68,6 +68,10 @@ object RootConstants {
     const val KEY_HOOK_WORD_MOTION_LATIN_LIFT = "key_hook_word_motion_latin_lift"
     const val KEY_HOOK_WORD_MOTION_LATIN_WAVE = "key_hook_word_motion_latin_wave"
 
+    // ================= TRANSLATION & ROMA KEYS =================
+    const val KEY_HOOK_DISPLAY_TRANSLATION = "key_hook_display_translation"
+    const val KEY_HOOK_DISPLAY_ROMA = "key_hook_display_roma"
+
     // ================= DEFAULTS =================
     const val DEFAULT_HOOK_LYRIC_MODE = 0
     const val DEFAULT_HOOK_ENABLE_SUPER_ISLAND = false
@@ -121,4 +125,7 @@ object RootConstants {
     const val DEFAULT_HOOK_WORD_MOTION_CJK_WAVE = 2.8f
     const val DEFAULT_HOOK_WORD_MOTION_LATIN_LIFT = 0.06f
     const val DEFAULT_HOOK_WORD_MOTION_LATIN_WAVE = 3.6f
+
+    const val DEFAULT_HOOK_DISPLAY_TRANSLATION = true
+    const val DEFAULT_HOOK_DISPLAY_ROMA = true
 }

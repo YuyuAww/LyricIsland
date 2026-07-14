@@ -36,7 +36,11 @@ fun LazyListScope.advancedSections(
     wordMotionLatinWave: Float,
     onWordMotionLatinWaveClick: () -> Unit,
     nextLyricLine: Boolean,
-    onNextLyricLineChange: (Boolean) -> Unit
+    onNextLyricLineChange: (Boolean) -> Unit,
+    displayTranslation: Boolean,
+    onDisplayTranslationChange: (Boolean) -> Unit,
+    displayRoma: Boolean,
+    onDisplayRomaChange: (Boolean) -> Unit
 ) {
     item {
         Column {
@@ -123,6 +127,26 @@ fun LazyListScope.advancedSections(
                         summary = stringResource(id = R.string.summary_next_lyric_line),
                         checked = nextLyricLine,
                         onCheckedChange = onNextLyricLineChange
+                    )
+                }
+            }
+        }
+    }
+
+    item {
+        Column {
+            SmallTitle(text = stringResource(id = R.string.title_lyric_content))
+            Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp).fillMaxWidth()) {
+                Column {
+                    SwitchPreference(
+                        title = stringResource(id = R.string.title_display_translation),
+                        checked = displayTranslation,
+                        onCheckedChange = onDisplayTranslationChange
+                    )
+                    SwitchPreference(
+                        title = stringResource(id = R.string.title_display_roma),
+                        checked = displayRoma,
+                        onCheckedChange = onDisplayRomaChange
                     )
                 }
             }

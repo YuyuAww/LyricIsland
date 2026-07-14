@@ -54,6 +54,7 @@
     <!-- ———————————————————————— SettingsPage ———————————————————————— -->
     <string name="title_display_translation">启用翻译</string>
     <string name="title_display_roma">启用罗马音</string>
+    <string name="title_lyric_content">歌词内容</string>
     <string name="toast_backup_success">备份成功</string>
     <string name="toast_backup_failed">备份失败: %1$s</string>
     <string name="toast_restore_empty">文件内容为空</string>

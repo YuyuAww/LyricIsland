@@ -87,6 +87,8 @@ fun LyricSettingsPage() {
     var wordMotionCjkWave by remember { mutableFloatStateOf(prefs.getFloat(RootConstants.KEY_HOOK_WORD_MOTION_CJK_WAVE, RootConstants.DEFAULT_HOOK_WORD_MOTION_CJK_WAVE)) }
     var wordMotionLatinLift by remember { mutableFloatStateOf(prefs.getFloat(RootConstants.KEY_HOOK_WORD_MOTION_LATIN_LIFT, RootConstants.DEFAULT_HOOK_WORD_MOTION_LATIN_LIFT)) }
     var wordMotionLatinWave by remember { mutableFloatStateOf(prefs.getFloat(RootConstants.KEY_HOOK_WORD_MOTION_LATIN_WAVE, RootConstants.DEFAULT_HOOK_WORD_MOTION_LATIN_WAVE)) }
+    var displayTranslation by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_DISPLAY_TRANSLATION, RootConstants.DEFAULT_HOOK_DISPLAY_TRANSLATION)) }
+    var displayRoma by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_DISPLAY_ROMA, RootConstants.DEFAULT_HOOK_DISPLAY_ROMA)) }
 
     var showTextSizeDialog by remember { mutableStateOf(false) }
     var showFontWeightDialog by remember { mutableStateOf(false) }
@@ -304,7 +306,11 @@ fun LyricSettingsPage() {
                             wordMotionLatinWave = wordMotionLatinWave,
                             onWordMotionLatinWaveClick = { showWordMotionLatinWaveDialog = true },
                             nextLyricLine = nextLyricLine,
-                            onNextLyricLineChange = { nextLyricLine = it; saveConfig(RootConstants.KEY_HOOK_NEXT_LYRIC_LINE, it) }
+                            onNextLyricLineChange = { nextLyricLine = it; saveConfig(RootConstants.KEY_HOOK_NEXT_LYRIC_LINE, it) },
+                            displayTranslation = displayTranslation,
+                            onDisplayTranslationChange = { displayTranslation = it; saveConfig(RootConstants.KEY_HOOK_DISPLAY_TRANSLATION, it) },
+                            displayRoma = displayRoma,
+                            onDisplayRomaChange = { displayRoma = it; saveConfig(RootConstants.KEY_HOOK_DISPLAY_ROMA, it) }
                         )
                     }
                 }

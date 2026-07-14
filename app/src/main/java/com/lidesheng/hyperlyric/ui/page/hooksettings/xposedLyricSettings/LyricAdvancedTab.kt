@@ -31,7 +31,11 @@ fun LyricAdvancedTab(
     wordMotionLatinWave: Float,
     onWordMotionLatinWaveClick: () -> Unit,
     nextLyricLine: Boolean,
-    onNextLyricLineChange: (Boolean) -> Unit
+    onNextLyricLineChange: (Boolean) -> Unit,
+    displayTranslation: Boolean,
+    onDisplayTranslationChange: (Boolean) -> Unit,
+    displayRoma: Boolean,
+    onDisplayRomaChange: (Boolean) -> Unit
 ) {
     LazyColumn(
         state = lazyListState,
@@ -61,7 +65,11 @@ fun LyricAdvancedTab(
             wordMotionLatinWave = wordMotionLatinWave,
             onWordMotionLatinWaveClick = onWordMotionLatinWaveClick,
             nextLyricLine = nextLyricLine,
-            onNextLyricLineChange = onNextLyricLineChange
+            onNextLyricLineChange = onNextLyricLineChange,
+            displayTranslation = displayTranslation,
+            onDisplayTranslationChange = onDisplayTranslationChange,
+            displayRoma = displayRoma,
+            onDisplayRomaChange = onDisplayRomaChange
         )
     }
 }

@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 
 import android.view.View
 
-import com.lidesheng.hyperlyric.common.UIConstants
+import com.lidesheng.hyperlyric.common.RootConstants
 import com.lidesheng.hyperlyric.common.media.MediaMetadataHelper
 import com.lidesheng.hyperlyric.lyric.model.RichLyricLine
 import com.lidesheng.hyperlyric.lyric.model.lyricMetadataOf
@@ -44,8 +44,8 @@ internal object IslandSlotContentAssembler {
         force: Boolean = false
     ) {
         val nextLinePreview = isNextLinePreviewEnabled(config)
-        val displayTranslation = prefs.getBoolean(UIConstants.KEY_DISPLAY_TRANSLATION, UIConstants.DEFAULT_DISPLAY_TRANSLATION)
-        val displayRoma = prefs.getBoolean(UIConstants.KEY_DISPLAY_ROMA, UIConstants.DEFAULT_DISPLAY_ROMA)
+        val displayTranslation = prefs.getBoolean(RootConstants.KEY_HOOK_DISPLAY_TRANSLATION, RootConstants.DEFAULT_HOOK_DISPLAY_TRANSLATION)
+        val displayRoma = prefs.getBoolean(RootConstants.KEY_HOOK_DISPLAY_ROMA, RootConstants.DEFAULT_HOOK_DISPLAY_ROMA)
         val signature = listOf(
             config.styleSignature,
             mode,
