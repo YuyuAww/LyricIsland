@@ -161,7 +161,7 @@ internal object IslandLyricTextInjector {
             if (targetView == null) {
                 existingWrapper.addView(createLyricView(rootView, viewTag, config, mode, suppressAnimation), createLyricTextLayoutParams())
                 changed = true
-            } else if (!isViewTypeCorrect(targetView, config.activeMode)) {
+            } else if (targetView !is RichLyricLineView) {
                 existingWrapper.removeView(targetView)
                 IslandSlotContentAssembler.invalidate(targetView)
                 existingWrapper.addView(createLyricView(rootView, viewTag, config, mode, suppressAnimation), createLyricTextLayoutParams())
@@ -195,7 +195,7 @@ internal object IslandLyricTextInjector {
 
         forceWrapperLayout(wrapperView, container, widthPx)
 
-        HookLogger.d(TAG, "已注入歌词视图: tag=$viewTag，激活模式=${config.activeMode}，内容模式=$mode，宽度=${widthPx}px")
+        HookLogger.d(TAG, "已注入歌词视图: tag=$viewTag，内容模式=$mode，宽度=${widthPx}px")
         return true
     }
 
@@ -272,14 +272,6 @@ internal object IslandLyricTextInjector {
         }
         if (changed) wrapper.requestLayout()
         return changed
-    }
-
-    private fun isViewTypeCorrect(view: View, activeMode: Int): Boolean {
-        return if (activeMode == 1) {
-            view is SpaceGateRichLyricLineView
-        } else {
-            view is RichLyricLineView
-        }
     }
 
     private fun restoreTargetView(targetView: View, config: IslandSlotRuntimeConfig, mode: Int, reconfigure: Boolean, suppressAnimation: Boolean = false): Boolean {

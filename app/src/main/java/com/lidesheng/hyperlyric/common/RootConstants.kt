@@ -3,7 +3,6 @@ package com.lidesheng.hyperlyric.common
 object RootConstants {
     // ================= HOOK & SUPER ISLAND KEYS =================
     const val KEY_HOOK_ENABLE_SUPER_ISLAND = "key_hook_enable_super_island"
-    const val KEY_HOOK_LYRIC_MODE = "key_hook_lyric_mode"
 
     const val KEY_HOOK_ISLAND_LEFT_ALBUM = "key_hook_island_left_album"
     const val KEY_HOOK_ISLAND_CONTENT_LEFT = "key_hook_island_content_left"
@@ -73,7 +72,6 @@ object RootConstants {
     const val KEY_HOOK_DISPLAY_ROMA = "key_hook_display_roma"
 
     // ================= DEFAULTS =================
-    const val DEFAULT_HOOK_LYRIC_MODE = 0
     const val DEFAULT_HOOK_ENABLE_SUPER_ISLAND = false
     const val DEFAULT_HOOK_ISLAND_LEFT_ALBUM = true
     const val DEFAULT_HOOK_MAX_LEFT_WIDTH = 100

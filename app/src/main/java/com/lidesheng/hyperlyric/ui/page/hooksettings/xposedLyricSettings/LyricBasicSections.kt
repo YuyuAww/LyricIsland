@@ -18,7 +18,6 @@ import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 fun LazyListScope.basicSections(
-    lyricMode: Int,
     textSize: Int,
     onTextSizeClick: () -> Unit,
     textSizeRatio: Float,
@@ -165,65 +164,61 @@ fun LazyListScope.basicSections(
                         SwitchPreference(title = stringResource(id = R.string.title_stop_at_end), checked = marqueeStopEnd, onCheckedChange = onMarqueeStopEndChange)
                     }
                 }
-                AnimatedVisibility(visible = lyricMode == 0) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                SwitchPreference(
+                    title = stringResource(id = R.string.title_marquee_metadata_mode),
+                    summary = stringResource(id = R.string.summary_marquee_metadata_mode),
+                    checked = marqueeMetadataMode,
+                    onCheckedChange = onMarqueeMetadataModeChange
+                )
+                AnimatedVisibility(visible = marqueeMetadataMode) {
                     Column {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
-                        SwitchPreference(
-                            title = stringResource(id = R.string.title_marquee_metadata_mode),
-                            summary = stringResource(id = R.string.summary_marquee_metadata_mode),
-                            checked = marqueeMetadataMode,
-                            onCheckedChange = onMarqueeMetadataModeChange
-                        )
-                        AnimatedVisibility(visible = marqueeMetadataMode) {
-                            Column {
-                                ArrowPreference(
-                                    title = stringResource(id = R.string.title_marquee_metadata_speed),
-                                    onClick = onMarqueeMetadataSpeedClick,
-                                    endActions = {
-                                        Text(
-                                            "$marqueeMetadataSpeed",
-                                            fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                            color = MiuixTheme.colorScheme.onSurfaceVariantActions
-                                        )
-                                    }
-                                )
-                                ArrowPreference(
-                                    title = stringResource(id = R.string.title_marquee_metadata_delay),
-                                    onClick = onMarqueeMetadataDelayClick,
-                                    endActions = {
-                                        Text(
-                                            stringResource(
-                                                id = R.string.format_ms,
-                                                marqueeMetadataDelay
-                                            ),
-                                            fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                            color = MiuixTheme.colorScheme.onSurfaceVariantActions
-                                        )
-                                    }
-                                )
-                                SwitchPreference(
-                                    title = stringResource(id = R.string.title_marquee_metadata_infinite),
-                                    checked = marqueeMetadataInfinite,
-                                    onCheckedChange = onMarqueeMetadataInfiniteChange
-                                )
-                                ArrowPreference(
-                                    title = stringResource(id = R.string.title_marquee_metadata_loop),
-                                    onClick = onMarqueeMetadataLoopClick,
-                                    endActions = {
-                                        Text(
-                                            stringResource(
-                                                id = R.string.format_ms,
-                                                marqueeMetadataLoopDelay
-                                            ),
-                                            fontSize = MiuixTheme.textStyles.body2.fontSize,
-                                            color = MiuixTheme.colorScheme.onSurfaceVariantActions
-                                        )
-                                    }
+                        ArrowPreference(
+                            title = stringResource(id = R.string.title_marquee_metadata_speed),
+                            onClick = onMarqueeMetadataSpeedClick,
+                            endActions = {
+                                Text(
+                                    "$marqueeMetadataSpeed",
+                                    fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
                                 )
                             }
-                        }
+                        )
+                        ArrowPreference(
+                            title = stringResource(id = R.string.title_marquee_metadata_delay),
+                            onClick = onMarqueeMetadataDelayClick,
+                            endActions = {
+                                Text(
+                                    stringResource(
+                                        id = R.string.format_ms,
+                                        marqueeMetadataDelay
+                                    ),
+                                    fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                                )
+                            }
+                        )
+                        SwitchPreference(
+                            title = stringResource(id = R.string.title_marquee_metadata_infinite),
+                            checked = marqueeMetadataInfinite,
+                            onCheckedChange = onMarqueeMetadataInfiniteChange
+                        )
+                        ArrowPreference(
+                            title = stringResource(id = R.string.title_marquee_metadata_loop),
+                            onClick = onMarqueeMetadataLoopClick,
+                            endActions = {
+                                Text(
+                                    stringResource(
+                                        id = R.string.format_ms,
+                                        marqueeMetadataLoopDelay
+                                    ),
+                                    fontSize = MiuixTheme.textStyles.body2.fontSize,
+                                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                                )
+                            }
+                        )
                     }
                 }
             }

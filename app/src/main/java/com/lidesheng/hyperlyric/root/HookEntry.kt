@@ -20,8 +20,6 @@ import io.github.libxposed.api.XposedModuleInterface.PackageLoadedParam
 class HookEntry : XposedModule() {
 
     companion object {
-        @Volatile
-        var activeMode = 0
         val lyriconSource = LyriconSource()
         var sourceManager: SourceManager? = null
             private set
@@ -132,9 +130,6 @@ class HookEntry : XposedModule() {
                 HookLogger.i("HookEntry","已在设置中禁用超级岛歌词功能")
             }
 
-            activeMode = prefs.getInt(RootConstants.KEY_HOOK_LYRIC_MODE, RootConstants.DEFAULT_HOOK_LYRIC_MODE)
-            HookLogger.i("HookEntry","超级岛激活模式 = $activeMode")
-
             // 劫持 Application.onCreate 以初始化 Lyricon Receiver 所需的环境
             try {
                 val appClass = param.defaultClassLoader.loadClass("android.app.Application")
@@ -223,15 +218,6 @@ class HookEntry : XposedModule() {
                     }
                     entry.prefListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
                         when (key) {
-                            RootConstants.KEY_HOOK_LYRIC_MODE -> {
-                                val newMode = entry.prefs.getInt(key, RootConstants.DEFAULT_HOOK_LYRIC_MODE)
-                                if (newMode == activeMode) return@OnSharedPreferenceChangeListener
-                                HookLogger.i("HookEntry", "歌词模式切换: $newMode")
-                                android.os.Handler(android.os.Looper.getMainLooper()).post {
-                                    activeMode = newMode
-                                    BaseIslandRenderer.refreshActiveIsland()
-                                }
-                            }
                             RootConstants.KEY_HOOK_ENABLE_SUPER_ISLAND -> {
                                 android.os.Handler(android.os.Looper.getMainLooper()).post {
                                     if (entry.prefs.getBoolean(key, RootConstants.DEFAULT_HOOK_ENABLE_SUPER_ISLAND)) {

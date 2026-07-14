@@ -96,27 +96,6 @@ fun HookSettingsPage() {
 }
 
 private fun LazyListScope.hookSettingsSections() {
-    item(key = "lyric_mode") {
-        val context = LocalContext.current
-        val prefs = remember { context.getSharedPreferences(UIConstants.PREF_NAME, Context.MODE_PRIVATE) }
-        var lyricMode by remember { mutableIntStateOf(prefs.getInt(RootConstants.KEY_HOOK_LYRIC_MODE, RootConstants.DEFAULT_HOOK_LYRIC_MODE)) }
-        val lyricModeOptions = listOf(
-            stringResource(R.string.lyric_mode_verbatim),
-            stringResource(R.string.lyric_mode_separated)
-        )
-        Card(modifier = Modifier.padding(horizontal = 12.dp).fillMaxWidth()) {
-            OverlayDropdownPreference(
-                title = stringResource(R.string.title_lyric_mode),
-                items = lyricModeOptions,
-                selectedIndex = lyricMode,
-                    onSelectedIndexChange = { index ->
-                    lyricMode = index
-                    prefs.edit { putInt(RootConstants.KEY_HOOK_LYRIC_MODE, index) }
-                    PrefsBridge.putInt(RootConstants.KEY_HOOK_LYRIC_MODE, index)
-                }
-            )
-        }
-    }
     item(key = "custom_config_title") {
         SmallTitle(text = stringResource(R.string.title_custom_config))
     }

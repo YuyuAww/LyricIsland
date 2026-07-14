@@ -80,7 +80,6 @@ fun LyricSettingsPage() {
     var extractCoverGradient by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_EXTRACT_COVER_TEXT_GRADIENT, RootConstants.DEFAULT_HOOK_EXTRACT_COVER_TEXT_GRADIENT)) }
     var customFontPath by remember { mutableStateOf(prefs.getString(RootConstants.KEY_HOOK_CUSTOM_FONT_PATH, null) ?: "") }
     var centerLyric by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_CENTER_LYRIC, RootConstants.DEFAULT_HOOK_CENTER_LYRIC)) }
-    val lyricMode by remember { mutableIntStateOf(prefs.getInt(RootConstants.KEY_HOOK_LYRIC_MODE, RootConstants.DEFAULT_HOOK_LYRIC_MODE)) }
 
     var wordMotionEnabled by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_WORD_MOTION_ENABLED, RootConstants.DEFAULT_HOOK_WORD_MOTION_ENABLED)) }
     var wordMotionCjkLift by remember { mutableFloatStateOf(prefs.getFloat(RootConstants.KEY_HOOK_WORD_MOTION_CJK_LIFT, RootConstants.DEFAULT_HOOK_WORD_MOTION_CJK_LIFT)) }
@@ -239,7 +238,6 @@ fun LyricSettingsPage() {
                             lazyListState = basicLazyListState,
                             topAppBarScrollBehavior = topAppBarScrollBehavior,
                             contentPadding = contentPadding,
-                            lyricMode = lyricMode,
                             textSize = textSize,
                             onTextSizeClick = { showTextSizeDialog = true },
                             textSizeRatio = textSizeRatio,
@@ -288,7 +286,6 @@ fun LyricSettingsPage() {
                             lazyListState = advancedLazyListState,
                             topAppBarScrollBehavior = topAppBarScrollBehavior,
                             contentPadding = contentPadding,
-                            lyricMode = lyricMode,
                             gradientStyle = gradientStyle,
                             onGradientStyleChange = { gradientStyle = it; saveConfig(RootConstants.KEY_HOOK_GRADIENT_PROGRESS, it) },
                             syllableRelative = syllableRelative,

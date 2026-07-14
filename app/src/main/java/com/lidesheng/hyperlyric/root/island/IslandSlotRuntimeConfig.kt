@@ -5,7 +5,6 @@ import android.view.View
 import com.lidesheng.hyperlyric.common.RootConstants
 
 internal data class IslandSlotRuntimeConfig(
-    val activeMode: Int,
     val leftMode: Int,
     val rightMode: Int,
     val showAlbum: Boolean,
@@ -49,11 +48,9 @@ internal data class IslandSlotRuntimeConfig(
     val wordMotionLatinLift: Float,
     val wordMotionLatinWave: Float
 ) {
-    val isSplitMode: Boolean
-        get() = activeMode == 1
+    val isSplitMode: Boolean = false
 
     val styleSignature: String = listOf(
-        activeMode,
         textSizeSp,
         textSizeRatio,
         fontWeight,
@@ -127,11 +124,9 @@ internal data class IslandSlotRuntimeConfig(
 
     companion object {
         fun from(prefs: SharedPreferences): IslandSlotRuntimeConfig {
-            val activeMode = prefs.getInt(RootConstants.KEY_HOOK_LYRIC_MODE, RootConstants.DEFAULT_HOOK_LYRIC_MODE)
             return IslandSlotRuntimeConfig(
-                activeMode = activeMode,
-                leftMode = if (activeMode == 1) 7 else prefs.getInt(RootConstants.KEY_HOOK_ISLAND_CONTENT_LEFT, RootConstants.DEFAULT_HOOK_ISLAND_CONTENT_LEFT),
-                rightMode = if (activeMode == 1) 7 else prefs.getInt(RootConstants.KEY_HOOK_ISLAND_CONTENT_RIGHT, RootConstants.DEFAULT_HOOK_ISLAND_CONTENT_RIGHT),
+                leftMode = prefs.getInt(RootConstants.KEY_HOOK_ISLAND_CONTENT_LEFT, RootConstants.DEFAULT_HOOK_ISLAND_CONTENT_LEFT),
+                rightMode = prefs.getInt(RootConstants.KEY_HOOK_ISLAND_CONTENT_RIGHT, RootConstants.DEFAULT_HOOK_ISLAND_CONTENT_RIGHT),
                 showAlbum = prefs.getBoolean(RootConstants.KEY_HOOK_ISLAND_LEFT_ALBUM, RootConstants.DEFAULT_HOOK_ISLAND_LEFT_ALBUM),
                 showRhythm = prefs.getBoolean(RootConstants.KEY_HOOK_ISLAND_RIGHT_ICON, RootConstants.DEFAULT_HOOK_ISLAND_RIGHT_ICON),
                 leftPaddingLeftDp = prefs.getInt(RootConstants.KEY_HOOK_ISLAND_LEFT_PADDING_LEFT, RootConstants.DEFAULT_HOOK_ISLAND_LEFT_PADDING_LEFT),

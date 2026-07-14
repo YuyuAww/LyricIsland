@@ -18,7 +18,6 @@ import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 fun LazyListScope.advancedSections(
-    lyricMode: Int,
     gradientStyle: Boolean,
     onGradientStyleChange: (Boolean) -> Unit,
     syllableRelative: Boolean,
@@ -117,18 +116,15 @@ fun LazyListScope.advancedSections(
     }
 
     item {
-        val supportsNextLyricLine = lyricMode == 0
-        AnimatedVisibility(visible = supportsNextLyricLine) {
-            Column {
-                SmallTitle(text = stringResource(id = R.string.title_next_lyric_line))
-                Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp).fillMaxWidth()) {
-                    SwitchPreference(
-                        title = stringResource(id = R.string.title_next_lyric_line),
-                        summary = stringResource(id = R.string.summary_next_lyric_line),
-                        checked = nextLyricLine,
-                        onCheckedChange = onNextLyricLineChange
-                    )
-                }
+        Column {
+            SmallTitle(text = stringResource(id = R.string.title_next_lyric_line))
+            Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp).fillMaxWidth()) {
+                SwitchPreference(
+                    title = stringResource(id = R.string.title_next_lyric_line),
+                    summary = stringResource(id = R.string.summary_next_lyric_line),
+                    checked = nextLyricLine,
+                    onCheckedChange = onNextLyricLineChange
+                )
             }
         }
     }

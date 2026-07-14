@@ -1,7 +1,6 @@
 package com.lidesheng.hyperlyric.ui.page.hooksettings
 
 import android.content.Context
-import androidx.compose.animation.AnimatedVisibility
 import com.lidesheng.hyperlyric.ui.component.NumberInputDialog
 import com.lidesheng.hyperlyric.ui.component.PaddingInputDialog
 import androidx.compose.foundation.layout.Box
@@ -55,7 +54,6 @@ fun SuperIslandSettingsPage() {
 
     var islandContentLeft by remember { mutableIntStateOf(prefs.getInt(RootConstants.KEY_HOOK_ISLAND_CONTENT_LEFT, RootConstants.DEFAULT_HOOK_ISLAND_CONTENT_LEFT)) }
     var islandContentRight by remember { mutableIntStateOf(prefs.getInt(RootConstants.KEY_HOOK_ISLAND_CONTENT_RIGHT, RootConstants.DEFAULT_HOOK_ISLAND_CONTENT_RIGHT)) }
-    val lyricMode by remember { mutableIntStateOf(prefs.getInt(RootConstants.KEY_HOOK_LYRIC_MODE, RootConstants.DEFAULT_HOOK_LYRIC_MODE)) }
     var audioCover by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_ISLAND_LEFT_ALBUM, RootConstants.DEFAULT_HOOK_ISLAND_LEFT_ALBUM)) }
     var audioRhythm by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_ISLAND_RIGHT_ICON, RootConstants.DEFAULT_HOOK_ISLAND_RIGHT_ICON)) }
     var leftPaddingLeft by remember { mutableIntStateOf(prefs.getInt(RootConstants.KEY_HOOK_ISLAND_LEFT_PADDING_LEFT, RootConstants.DEFAULT_HOOK_ISLAND_LEFT_PADDING_LEFT)) }
@@ -183,32 +181,28 @@ fun SuperIslandSettingsPage() {
                         Column {
                             SwitchPreference(title = stringResource(id = R.string.title_audio_cover), checked = audioCover, onCheckedChange = { audioCover = it; saveConfig(RootConstants.KEY_HOOK_ISLAND_LEFT_ALBUM, it) })
                             SwitchPreference(title = stringResource(id = R.string.title_audio_rhythm), checked = audioRhythm, onCheckedChange = { audioRhythm = it; saveConfig(RootConstants.KEY_HOOK_ISLAND_RIGHT_ICON, it) })
-                            AnimatedVisibility(visible = lyricMode == 0) {
-                                Column {
-                                    OverlayDropdownPreference(
-                                        title = stringResource(id = R.string.title_super_island_left),
-                                        items = contentOptions,
-                                        selectedIndex = islandContentLeft,
-                                        onSelectedIndexChange = {
-                                            islandContentLeft = it; saveConfig(
-                                            RootConstants.KEY_HOOK_ISLAND_CONTENT_LEFT,
-                                            it
-                                            )
-                                        }
-                                    )
-                                    OverlayDropdownPreference(
-                                        title = stringResource(id = R.string.title_super_island_right),
-                                        items = contentOptions,
-                                        selectedIndex = islandContentRight,
-                                        onSelectedIndexChange = {
-                                            islandContentRight = it; saveConfig(
-                                            RootConstants.KEY_HOOK_ISLAND_CONTENT_RIGHT,
-                                            it
-                                            )
-                                        }
+                            OverlayDropdownPreference(
+                                title = stringResource(id = R.string.title_super_island_left),
+                                items = contentOptions,
+                                selectedIndex = islandContentLeft,
+                                onSelectedIndexChange = {
+                                    islandContentLeft = it; saveConfig(
+                                    RootConstants.KEY_HOOK_ISLAND_CONTENT_LEFT,
+                                    it
                                     )
                                 }
-                            }
+                            )
+                            OverlayDropdownPreference(
+                                title = stringResource(id = R.string.title_super_island_right),
+                                items = contentOptions,
+                                selectedIndex = islandContentRight,
+                                onSelectedIndexChange = {
+                                    islandContentRight = it; saveConfig(
+                                    RootConstants.KEY_HOOK_ISLAND_CONTENT_RIGHT,
+                                    it
+                                    )
+                                }
+                            )
                         }
                     }
                 }

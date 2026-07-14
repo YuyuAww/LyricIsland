@@ -13,7 +13,6 @@ fun LyricAdvancedTab(
     lazyListState: LazyListState,
     topAppBarScrollBehavior: ScrollBehavior,
     contentPadding: PaddingValues,
-    lyricMode: Int,
     gradientStyle: Boolean,
     onGradientStyleChange: (Boolean) -> Unit,
     syllableRelative: Boolean,
@@ -47,7 +46,6 @@ fun LyricAdvancedTab(
         contentPadding = contentPadding,
     ) {
         advancedSections(
-            lyricMode = lyricMode,
             gradientStyle = gradientStyle,
             onGradientStyleChange = onGradientStyleChange,
             syllableRelative = syllableRelative,
