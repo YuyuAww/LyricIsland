@@ -35,12 +35,6 @@ fun LazyListScope.advancedSections(
     onWordMotionLatinLiftClick: () -> Unit,
     wordMotionLatinWave: Float,
     onWordMotionLatinWaveClick: () -> Unit,
-    disableTranslation: Boolean,
-    onDisableTranslationChange: (Boolean) -> Unit,
-    translationOnly: Boolean,
-    onTranslationOnlyChange: (Boolean) -> Unit,
-    swapTranslation: Boolean,
-    onSwapTranslationChange: (Boolean) -> Unit,
     nextLyricLine: Boolean,
     onNextLyricLineChange: (Boolean) -> Unit
 ) {
@@ -119,38 +113,16 @@ fun LazyListScope.advancedSections(
     }
 
     item {
-        // 由于现在仅剩 Lyricon 源，supportsNextLyricLine 简化为只判断 lyricMode
         val supportsNextLyricLine = lyricMode == 0
-        val translationControlsEnabled = !supportsNextLyricLine || !nextLyricLine
-        Column {
-            SmallTitle(text = stringResource(id = R.string.title_translation))
-            Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp).fillMaxWidth()) {
-                Column {
-                    AnimatedVisibility(visible = supportsNextLyricLine) {
-                        SwitchPreference(
-                            title = stringResource(id = R.string.title_next_lyric_line),
-                            summary = stringResource(id = R.string.summary_next_lyric_line),
-                            checked = nextLyricLine,
-                            onCheckedChange = onNextLyricLineChange
-                        )
-                    }
+        AnimatedVisibility(visible = supportsNextLyricLine) {
+            Column {
+                SmallTitle(text = stringResource(id = R.string.title_next_lyric_line))
+                Card(modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp).fillMaxWidth()) {
                     SwitchPreference(
-                        title = stringResource(id = R.string.title_disable_translation),
-                        checked = disableTranslation,
-                        onCheckedChange = onDisableTranslationChange,
-                        enabled = translationControlsEnabled
-                    )
-                    SwitchPreference(
-                        title = stringResource(id = R.string.title_translation_only),
-                        checked = translationOnly,
-                        onCheckedChange = onTranslationOnlyChange,
-                        enabled = translationControlsEnabled
-                    )
-                    SwitchPreference(
-                        title = stringResource(id = R.string.title_swap_translation),
-                        checked = swapTranslation,
-                        onCheckedChange = onSwapTranslationChange,
-                        enabled = translationControlsEnabled
+                        title = stringResource(id = R.string.title_next_lyric_line),
+                        summary = stringResource(id = R.string.summary_next_lyric_line),
+                        checked = nextLyricLine,
+                        onCheckedChange = onNextLyricLineChange
                     )
                 }
             }

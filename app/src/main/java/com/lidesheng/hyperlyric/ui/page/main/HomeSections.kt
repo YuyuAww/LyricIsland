@@ -18,9 +18,6 @@ import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 fun LazyListScope.homePageSections(
-    randomQuote: String,
-    onQuoteClick: () -> Unit,
-    onQuoteLongPress: () -> Unit,
     enableSuperIsland: Boolean,
     onSuperIslandToggle: (Boolean) -> Unit,
     onSuperIslandConfigClick: () -> Unit,
@@ -31,22 +28,6 @@ fun LazyListScope.homePageSections(
     onRemoveIslandWhitelistToggle: (Boolean) -> Unit,
     onAppSettingsClick: () -> Unit,
 ) {
-    item(key = "quote") {
-        Card(
-            modifier = Modifier.padding(horizontal = 12.dp).fillMaxWidth(),
-            onClick = onQuoteClick,
-            onLongPress = onQuoteLongPress,
-        ) {
-            Text(
-                text = randomQuote,
-                fontSize = 13.sp,
-                lineHeight = 18.sp,
-                color = MiuixTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-    }
-
     item(key = "basic_features_title") {
         SmallTitle(
             text = stringResource(R.string.title_basic_features)

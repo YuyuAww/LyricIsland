@@ -14,7 +14,6 @@ import com.lidesheng.hyperlyric.ui.page.SetupPage
 import com.lidesheng.hyperlyric.ui.page.LicensesPage
 import com.lidesheng.hyperlyric.ui.page.LogPage
 import com.lidesheng.hyperlyric.ui.page.SettingsPage
-import com.lidesheng.hyperlyric.ui.page.PoetryPage
 import com.lidesheng.hyperlyric.ui.page.HookSettingsPage
 import com.lidesheng.hyperlyric.ui.page.hooksettings.LyricProviderPage
 import com.lidesheng.hyperlyric.ui.page.hooksettings.LyricAnimationPage
@@ -47,7 +46,6 @@ fun AppNavigation(startRoute: Route) {
                 entry<Route.SuperIslandSettings> { SuperIslandSettingsPage() }
                 entry<Route.Log> { LogPage() }
                 entry<Route.Licenses> { LicensesPage() }
-                entry<Route.Poetry> { PoetryPage() }
                 entry<Route.Help> { HelpPage() }
                 entry<Route.Changelog> { ChangelogPage() }
             }

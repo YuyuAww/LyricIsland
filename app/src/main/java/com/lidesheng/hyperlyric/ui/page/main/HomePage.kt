@@ -24,9 +24,6 @@ import com.lidesheng.hyperlyric.ui.utils.rememberBlurBackdrop
 @Composable
 fun HomePage(
     outerPadding: PaddingValues,
-    randomQuote: String,
-    onQuoteClick: () -> Unit,
-    onQuoteLongPress: () -> Unit,
     enableSuperIsland: Boolean,
     onSuperIslandToggle: (Boolean) -> Unit,
     onSuperIslandConfigClick: () -> Unit,
@@ -73,9 +70,6 @@ fun HomePage(
                 contentPadding = contentPadding,
             ) {
                 homePageSections(
-                    randomQuote = randomQuote,
-                    onQuoteClick = onQuoteClick,
-                    onQuoteLongPress = onQuoteLongPress,
                     enableSuperIsland = enableSuperIsland,
                     onSuperIslandToggle = onSuperIslandToggle,
                     onSuperIslandConfigClick = onSuperIslandConfigClick,

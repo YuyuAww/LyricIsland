@@ -50,12 +50,10 @@ import androidx.core.content.edit
 import androidx.core.content.pm.PackageInfoCompat
 import com.lidesheng.hyperlyric.common.RootConstants
 import com.lidesheng.hyperlyric.common.UIConstants
-import com.lidesheng.hyperlyric.ui.utils.QuotesData
 import com.lidesheng.hyperlyric.R
 import com.lidesheng.hyperlyric.common.PrefsBridge
 import com.lidesheng.hyperlyric.root.RootApplication
 import com.lidesheng.hyperlyric.utils.MigrationData
-import com.lidesheng.hyperlyric.root.utils.ShellUtils
 import com.lidesheng.hyperlyric.ui.navigation.LocalNavigator
 import com.lidesheng.hyperlyric.ui.navigation.Route
 import com.lidesheng.hyperlyric.ui.utils.rememberBlurBackdrop
@@ -102,9 +100,6 @@ fun MainPage() {
     LaunchedEffect(mainPagerState.pagerState.currentPage) {
         mainPagerState.syncPage()
     }
-
-    // --- quote ---
-    var randomQuote by rememberSaveable { mutableStateOf(QuotesData.list.random()) }
 
     // --- toast messages ---
     val msgNoRoot = stringResource(R.string.toast_no_root)
@@ -380,9 +375,6 @@ fun MainPage() {
                 if (page == 0) {
                     HomePage(
                         outerPadding = innerPadding,
-                        randomQuote = randomQuote,
-                        onQuoteClick = { randomQuote = QuotesData.list.random() },
-                        onQuoteLongPress = { navigator.navigate(Route.Poetry) },
                         enableSuperIsland = enableSuperIsland,
                         onSuperIslandToggle = toggleSuperIsland,
                         onSuperIslandConfigClick = { navigator.navigate(Route.HookSettings) },

@@ -30,12 +30,6 @@ fun LyricAdvancedTab(
     onWordMotionLatinLiftClick: () -> Unit,
     wordMotionLatinWave: Float,
     onWordMotionLatinWaveClick: () -> Unit,
-    disableTranslation: Boolean,
-    onDisableTranslationChange: (Boolean) -> Unit,
-    translationOnly: Boolean,
-    onTranslationOnlyChange: (Boolean) -> Unit,
-    swapTranslation: Boolean,
-    onSwapTranslationChange: (Boolean) -> Unit,
     nextLyricLine: Boolean,
     onNextLyricLineChange: (Boolean) -> Unit
 ) {
@@ -66,12 +60,6 @@ fun LyricAdvancedTab(
             onWordMotionLatinLiftClick = onWordMotionLatinLiftClick,
             wordMotionLatinWave = wordMotionLatinWave,
             onWordMotionLatinWaveClick = onWordMotionLatinWaveClick,
-            disableTranslation = disableTranslation,
-            onDisableTranslationChange = onDisableTranslationChange,
-            translationOnly = translationOnly,
-            onTranslationOnlyChange = onTranslationOnlyChange,
-            swapTranslation = swapTranslation,
-            onSwapTranslationChange = onSwapTranslationChange,
             nextLyricLine = nextLyricLine,
             onNextLyricLineChange = onNextLyricLineChange
         )
