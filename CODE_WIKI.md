@@ -115,16 +115,7 @@ com.lidesheng.hyperlyric
 | [PrefsBridge.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/PrefsBridge.kt) | SharedPreferences 桥接，支持 App 进程与 Xposed 远程进程配置同步 |
 | [HyperLogger.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/HyperLogger.kt) | 日志接口抽象，统一日志输出规范 |
 
-#### 3.1.3 歌词解析工具
-
-| 类名 | 职责 |
-|------|------|
-| [LrcParser.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/lyric/LrcParser.kt) | LRC 格式歌词解析器 |
-| [LyricInfoParser.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/lyric/LyricInfoParser.kt) | 歌词信息解析器 |
-| [LyricSplitter.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/lyric/LyricSplitter.kt) | 歌词文本分割器，用于左右岛布局分割 |
-| [RichLyricLineSplitter.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/common/lyric/RichLyricLineSplitter.kt) | 富文本歌词行分割器 |
-
-#### 3.1.4 媒体与图片工具
+#### 3.1.3 媒体与图片工具
 
 | 类名 | 职责 |
 |------|------|
@@ -146,7 +137,6 @@ com.lidesheng.hyperlyric
 | [LyricWord.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/model/LyricWord.kt) | 歌词单词模型，支持逐字歌词 |
 | [LyricMetadata.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/model/LyricMetadata.kt) | 歌词元数据（翻译、音译等） |
 | [LyricTiming.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/model/LyricTiming.kt) | 歌词时间信息 |
-| [LyricModels.kt](file:///workspace/app/src/main/java/com/lidesheng/hyperlyric/lyric/LyricModels.kt) | LrcLine 数据类定义 |
 
 #### 3.2.2 歌词源管理 (source)
 
