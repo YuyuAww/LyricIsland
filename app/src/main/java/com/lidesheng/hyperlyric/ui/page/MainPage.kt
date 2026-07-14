@@ -53,6 +53,7 @@ import com.lidesheng.hyperlyric.common.UIConstants
 import com.lidesheng.hyperlyric.R
 import com.lidesheng.hyperlyric.common.PrefsBridge
 import com.lidesheng.hyperlyric.root.RootApplication
+import com.lidesheng.hyperlyric.root.utils.ShellUtils
 import com.lidesheng.hyperlyric.utils.MigrationData
 import com.lidesheng.hyperlyric.ui.navigation.LocalNavigator
 import com.lidesheng.hyperlyric.ui.navigation.Route
