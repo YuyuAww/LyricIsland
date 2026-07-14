@@ -70,6 +70,10 @@ internal class LyricLineAssembler(
                     words = emptyList()
                     metadata = lyricMetadataOf(METADATA_NEXT_LINE_PREVIEW to "true")
                 }
+                !source.secondary.isNullOrBlank() -> {
+                    text = source.secondary
+                    words = source.secondaryWords ?: emptyList()
+                }
                 displayTranslation && (!source.translation.isNullOrBlank()
                         || !source.translationWords.isNullOrEmpty()) -> {
                     text = source.translation
