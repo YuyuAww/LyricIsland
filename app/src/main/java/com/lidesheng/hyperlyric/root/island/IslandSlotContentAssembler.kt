@@ -161,7 +161,9 @@ internal object IslandSlotContentAssembler {
             config = config,
             isLeft = view.tag == IslandProbeUtils.LEFT_TEST_VIEW_TAG
         )
-        val signature = "lyric|${lineContentSignature(targetLine)}|${config.styleSignature}"
+        val displayTranslation = prefs.getBoolean(RootConstants.KEY_HOOK_DISPLAY_TRANSLATION, RootConstants.DEFAULT_HOOK_DISPLAY_TRANSLATION)
+        val displayRoma = prefs.getBoolean(RootConstants.KEY_HOOK_DISPLAY_ROMA, RootConstants.DEFAULT_HOOK_DISPLAY_ROMA)
+        val signature = "lyric|${lineContentSignature(targetLine)}|${config.styleSignature}|$displayTranslation|$displayRoma"
         if (!force && lastContentSignatures[view] == signature) {
             applyPlaybackActive(view, playbackActive)
             return false
