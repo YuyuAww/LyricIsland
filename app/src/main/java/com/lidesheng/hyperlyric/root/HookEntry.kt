@@ -2,6 +2,7 @@ package com.lidesheng.hyperlyric.root
 
 import com.lidesheng.hyperlyric.lyric.source.SourceManager
 import com.lidesheng.hyperlyric.root.bridge.IpcRouter
+import com.lidesheng.hyperlyric.root.island.IslandWhitelistUnlocking
 import com.lidesheng.hyperlyric.root.island.SystemUIHookRegistry
 import com.lidesheng.hyperlyric.root.island.renderer.IslandRenderer
 import com.lidesheng.hyperlyric.root.island.renderer.BaseIslandRenderer
