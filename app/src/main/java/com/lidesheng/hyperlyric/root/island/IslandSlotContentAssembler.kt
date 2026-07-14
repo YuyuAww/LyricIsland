@@ -77,13 +77,13 @@ internal object IslandSlotContentAssembler {
         )
         when (view) {
             is RichLyricLineView -> {
-                view.displayTranslation = displayTranslation && !nextLinePreview
-                view.displayRoma = displayRoma && !nextLinePreview
+                view.displayTranslation = displayTranslation
+                view.displayRoma = displayRoma
                 view.setStyle(style)
             }
             is SpaceGateRichLyricLineView -> {
-                view.displayTranslation = displayTranslation && !nextLinePreview
-                view.displayRoma = displayRoma && !nextLinePreview
+                view.displayTranslation = displayTranslation
+                view.displayRoma = displayRoma
                 view.setStyle(style)
             }
         }
