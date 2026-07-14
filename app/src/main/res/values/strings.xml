@@ -233,13 +233,9 @@
     <string name="title_syllable_highlight">相对进度歌词高亮显示</string>
     <string name="format_percent">%1$d%%</string>
     <string name="format_ms">%1$dms</string>
-    <string name="title_translation">翻译</string>
     <string name="label_custom_font_path">填写字体文件的完整路径</string>
-    <string name="title_disable_translation">禁用所有翻译</string>
-    <string name="title_translation_only">仅显示翻译</string>
-    <string name="title_swap_translation">原词翻译对调位置</string>
     <string name="title_next_lyric_line">显示下一句歌词</string>
-    <string name="summary_next_lyric_line">占用第二行，开启后不显示翻译</string>
+    <string name="summary_next_lyric_line">占用第二行</string>
     <string name="title_extract_cover_color">提取封面色</string>
     <string name="title_extract_cover_gradient">提取封面渐变色</string>
     <string name="title_word_motion">字词上浮动画</string>
@@ -251,16 +247,6 @@
     <string name="label_word_motion_wave_range">范围：0 ~ 8</string>
     <string name="title_custom_font">字体</string>
     <string name="summary_default_font">默认</string>
-    <string name="title_ai_translation">OpenAI 翻译</string>
-    <string name="title_ai_trans_basic">基础设置</string>
-    <string name="title_ai_trans_auto_ignore_chinese">自动跳过中文歌词</string>
-    <string name="title_ai_trans_skip_existing">自动跳过已有翻译歌曲</string>
-    <string name="label_ai_trans_api_key">API Key</string>
-    <string name="label_ai_trans_model">模型名称</string>
-    <string name="label_ai_trans_base_url">OpenAI API 地址</string>
-    <string name="label_ai_trans_target_lang">目标语言</string>
-    <string name="label_ai_trans_prompt">自定义翻译风格提示词</string>
-    <string name="summary_ai_trans_prompt_hint">留空使用默认提示词</string>
     <string name="title_verbatim_lyric">逐字歌词</string>
 
 
@@ -341,16 +327,12 @@
     <!-- Migration Dialog -->
     <string name="migration_dialog_title">版本更新提醒</string>
 
-    <!-- Poetry Page -->
-    <string name="back_to_top">回到顶部</string>
-
     <!-- Log Page -->
     <string name="unknown_time">未知时间</string>
 
     <!-- Lyric Settings Page -->
     <string name="tab_basic">基础功能</string>
     <string name="tab_advanced">高级功能</string>
-    <string name="title_custom_prompt">自定义提示词</string>
 
     <!-- Main Page & General Content Descriptions -->
     <string name="content_description_avatar">头像</string>

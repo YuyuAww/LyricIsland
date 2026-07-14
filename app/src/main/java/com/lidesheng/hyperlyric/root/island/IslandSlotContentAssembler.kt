@@ -18,7 +18,6 @@ import com.lidesheng.hyperlyric.root.LyriconDataBridge
 import com.lidesheng.hyperlyric.root.utils.HookLogger
 import com.lidesheng.hyperlyric.root.utils.CoverColorHelper
 import com.lidesheng.hyperlyric.root.utils.LyricStyleHelper
-import com.lidesheng.hyperlyric.root.utils.TranslationHelper
 import java.util.WeakHashMap
 
 internal object IslandSlotContentAssembler {
@@ -43,9 +42,7 @@ internal object IslandSlotContentAssembler {
         mediaInfo: MediaMetadataHelper.MediaInfo = currentMediaInfo(view.context),
         force: Boolean = false
     ) {
-        val nextLinePreview = isNextLinePreviewEnabled(prefs, config)
-        val disableAll = TranslationHelper.isTranslationDisabled(prefs) || nextLinePreview
-        val translationOnly = TranslationHelper.isTranslationOnly(prefs)
+        val nextLinePreview = isNextLinePreviewEnabled(config)
         val signature = listOf(
             config.styleSignature,
             mode,
@@ -77,13 +74,13 @@ internal object IslandSlotContentAssembler {
         )
         when (view) {
             is RichLyricLineView -> {
-                view.displayTranslation = LyriconDataBridge.isDisplayTranslation && !disableAll
-                view.displayRoma = LyriconDataBridge.isDisplayRoma && !disableAll && !translationOnly
+                view.displayTranslation = LyriconDataBridge.isDisplayTranslation && !nextLinePreview
+                view.displayRoma = LyriconDataBridge.isDisplayRoma && !nextLinePreview
                 view.setStyle(style)
             }
             is SpaceGateRichLyricLineView -> {
-                view.displayTranslation = LyriconDataBridge.isDisplayTranslation && !disableAll
-                view.displayRoma = LyriconDataBridge.isDisplayRoma && !disableAll && !translationOnly
+                view.displayTranslation = LyriconDataBridge.isDisplayTranslation && !nextLinePreview
+                view.displayRoma = LyriconDataBridge.isDisplayRoma && !nextLinePreview
                 view.setStyle(style)
             }
         }
@@ -136,18 +133,13 @@ internal object IslandSlotContentAssembler {
 
     fun processedRawLine(prefs: SharedPreferences, config: IslandSlotRuntimeConfig? = null): IRichLyricLine? {
         val songName = LyriconDataBridge.currentSongName?.takeIf { it.isNotEmpty() } ?: ""
-        var rawLine = LyriconDataBridge.currentLyricLine
+        val rawLine = LyriconDataBridge.currentLyricLine
             ?: RichLyricLine(text = songName, words = emptyList())
 
-        if (config != null && isNextLinePreviewEnabled(prefs, config)) {
+        if (config != null && isNextLinePreviewEnabled(config)) {
             return rawLine.withNextLinePreview(LyriconDataBridge.currentNextLyricLine)
         }
 
-        if (TranslationHelper.isTranslationOnly(prefs)) {
-            rawLine = TranslationHelper.applyTranslationOnly(rawLine)
-        } else if (TranslationHelper.isSwapTranslation(prefs)) {
-            rawLine = TranslationHelper.swapTranslation(rawLine)
-        }
         return rawLine
     }
 
@@ -187,7 +179,7 @@ internal object IslandSlotContentAssembler {
             }
         }
 
-        val suppressContentAnimation = suppressAnimation || isNextLinePreviewEnabled(prefs, config)
+        val suppressContentAnimation = suppressAnimation || isNextLinePreviewEnabled(config)
         if (config.lyricAnimationEnabled && !suppressContentAnimation) {
             val preset = YoYoPresets.getById(config.lyricAnimationId) ?: YoYoPresets.Default
             when (view) {
@@ -316,11 +308,9 @@ internal object IslandSlotContentAssembler {
     }
 
     private fun isNextLinePreviewEnabled(
-        prefs: SharedPreferences,
         config: IslandSlotRuntimeConfig
     ): Boolean {
         if (!config.nextLyricLine || config.isSplitMode) return false
-        // 当前仅支持 Lyricon 源，无需再检查歌词源类型
         return true
     }
 

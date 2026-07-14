@@ -75,9 +75,6 @@ fun LyricSettingsPage() {
     var syllableRelative by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_SYLLABLE_RELATIVE, RootConstants.DEFAULT_HOOK_SYLLABLE_RELATIVE)) }
     var syllableHighlight by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_SYLLABLE_HIGHLIGHT, RootConstants.DEFAULT_HOOK_SYLLABLE_HIGHLIGHT)) }
     var textSizeRatio by remember { mutableFloatStateOf(prefs.getFloat(RootConstants.KEY_HOOK_TEXT_SIZE_RATIO, RootConstants.DEFAULT_HOOK_TEXT_SIZE_RATIO)) }
-    var disableTranslation by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_DISABLE_TRANSLATION, RootConstants.DEFAULT_HOOK_DISABLE_TRANSLATION)) }
-    var translationOnly by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_TRANSLATION_ONLY, RootConstants.DEFAULT_HOOK_TRANSLATION_ONLY)) }
-    var swapTranslation by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_SWAP_TRANSLATION, RootConstants.DEFAULT_HOOK_SWAP_TRANSLATION)) }
     var nextLyricLine by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_NEXT_LYRIC_LINE, RootConstants.DEFAULT_HOOK_NEXT_LYRIC_LINE)) }
     var extractCoverColor by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_EXTRACT_COVER_TEXT_COLOR, RootConstants.DEFAULT_HOOK_EXTRACT_COVER_TEXT_COLOR)) }
     var extractCoverGradient by remember { mutableStateOf(prefs.getBoolean(RootConstants.KEY_HOOK_EXTRACT_COVER_TEXT_GRADIENT, RootConstants.DEFAULT_HOOK_EXTRACT_COVER_TEXT_GRADIENT)) }
@@ -306,26 +303,6 @@ fun LyricSettingsPage() {
                             onWordMotionLatinLiftClick = { showWordMotionLatinLiftDialog = true },
                             wordMotionLatinWave = wordMotionLatinWave,
                             onWordMotionLatinWaveClick = { showWordMotionLatinWaveDialog = true },
-                            disableTranslation = disableTranslation,
-                            onDisableTranslationChange = { disableTranslation = it; saveConfig(RootConstants.KEY_HOOK_DISABLE_TRANSLATION, it) },
-                            translationOnly = translationOnly,
-                            onTranslationOnlyChange = {
-                                translationOnly = it
-                                saveConfig(RootConstants.KEY_HOOK_TRANSLATION_ONLY, it)
-                                if (it && swapTranslation) {
-                                    swapTranslation = false
-                                    saveConfig(RootConstants.KEY_HOOK_SWAP_TRANSLATION, false)
-                                }
-                            },
-                            swapTranslation = swapTranslation,
-                            onSwapTranslationChange = {
-                                swapTranslation = it
-                                saveConfig(RootConstants.KEY_HOOK_SWAP_TRANSLATION, it)
-                                if (it && translationOnly) {
-                                    translationOnly = false
-                                    saveConfig(RootConstants.KEY_HOOK_TRANSLATION_ONLY, false)
-                                }
-                            },
                             nextLyricLine = nextLyricLine,
                             onNextLyricLineChange = { nextLyricLine = it; saveConfig(RootConstants.KEY_HOOK_NEXT_LYRIC_LINE, it) }
                         )

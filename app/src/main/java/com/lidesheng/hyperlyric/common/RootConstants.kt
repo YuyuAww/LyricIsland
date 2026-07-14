@@ -50,10 +50,7 @@ object RootConstants {
     const val KEY_HOOK_SYLLABLE_RELATIVE = "key_hook_syllable_relative"
     const val KEY_HOOK_SYLLABLE_HIGHLIGHT = "key_hook_syllable_highlight"
 
-    // ================= TRANSLATION KEYS =================
-    const val KEY_HOOK_DISABLE_TRANSLATION = "key_hook_disable_translation"
-    const val KEY_HOOK_TRANSLATION_ONLY = "key_hook_translation_only"
-    const val KEY_HOOK_SWAP_TRANSLATION = "key_hook_swap_translation"
+    // ================= NEXT LINE KEY =================
     const val KEY_HOOK_NEXT_LYRIC_LINE = "key_hook_next_lyric_line"
 
     // ================= COLOR KEYS =================
@@ -115,9 +112,6 @@ object RootConstants {
     const val DEFAULT_HOOK_SYLLABLE_RELATIVE = true
     const val DEFAULT_HOOK_SYLLABLE_HIGHLIGHT = false
 
-    const val DEFAULT_HOOK_DISABLE_TRANSLATION = false
-    const val DEFAULT_HOOK_TRANSLATION_ONLY = false
-    const val DEFAULT_HOOK_SWAP_TRANSLATION = false
     const val DEFAULT_HOOK_NEXT_LYRIC_LINE = false
     const val DEFAULT_HOOK_EXTRACT_COVER_TEXT_COLOR = false
     const val DEFAULT_HOOK_EXTRACT_COVER_TEXT_GRADIENT = false
