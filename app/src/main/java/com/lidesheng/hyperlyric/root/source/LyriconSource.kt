@@ -1,6 +1,7 @@
 package com.lidesheng.hyperlyric.root.source
 
 import android.app.Application
+import android.content.pm.PackageManager
 import com.lidesheng.hyperlyric.lyric.source.LyricSink
 import com.lidesheng.hyperlyric.lyric.source.LyricSource
 import com.lidesheng.hyperlyric.root.LyriconDataBridge
@@ -19,6 +20,7 @@ class LyriconSource : LyricSource {
 
     companion object {
         private const val TAG = "LyriconSource"
+        private const val LYRICON_CORE_PACKAGE = "io.github.proify.lyricon.core"
         private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true }
     }
 
@@ -36,7 +38,20 @@ class LyriconSource : LyricSource {
     @Volatile
     private var subscriber: LyriconSubscriber? = null
 
-    override fun isAvailable(): Boolean = true
+    /**
+     * 检查 Lyricon 核心服务是否可用
+     * 官方标准：Subscriber 需要安装 Lyricon 核心服务
+     */
+    override fun isAvailable(): Boolean {
+        val application = app ?: return false
+        return try {
+            application.packageManager.getPackageInfo(LYRICON_CORE_PACKAGE, 0)
+            true
+        } catch (e: PackageManager.NameNotFoundException) {
+            HookLogger.w(TAG, "Lyricon 核心服务未安装: $LYRICON_CORE_PACKAGE")
+            false
+        }
+    }
 
     override fun start(sink: LyricSink) {
         if (this.subscriber != null) {
@@ -99,38 +114,76 @@ class LyriconSource : LyricSource {
         }
     }
 
+    /**
+     * 活跃播放器监听器
+     * 实现 ActivePlayerListener 接口处理所有歌词事件
+     */
     private val activePlayerListener = object : ActivePlayerListener {
+        
+        /**
+         * 官方标准：providerInfo == null 表示当前没有活跃播放器，应清理当前 UI 状态
+         * 官方标准：播放器切换时，应将播放进度重置为新 Provider 回调中的值
+         */
         override fun onActiveProviderChanged(providerInfo: ProviderInfo?) {
+            if (providerInfo == null) {
+                // 无活跃播放器，清理 UI 状态并进入等待状态
+                HookLogger.i(TAG, "无活跃播放器，清理状态")
+                LyriconDataBridge.clearState()
+            } else {
+                // 播放器切换，通知 Sink 停止旧播放器
+                HookLogger.i(TAG, "活跃播放器变更: ${providerInfo.playerPackageName}")
+            }
             sink?.onStop()
             LyriconDataBridge.updateLyricPackage(providerInfo?.playerPackageName)
         }
 
+        /**
+         * 官方标准：song == null 表示当前歌曲已清空
+         */
         override fun onSongChanged(song: Song?) {
             val localSong = song?.toLocalSong()
             LyriconDataBridge.updateSong(localSong)
             sink?.onSongChanged(localSong)
         }
 
+        /**
+         * 官方标准：播放状态变化时触发
+         */
         override fun onPlaybackStateChanged(isPlaying: Boolean) {
             sink?.onPlaybackStateChanged(isPlaying)
         }
 
+        /**
+         * 官方标准：播放进度更新，单位毫秒，用于驱动歌词滚动或逐字进度
+         */
         override fun onPositionChanged(position: Long) {
             sink?.onPositionChanged(position)
         }
 
+        /**
+         * 官方标准：主动跳转进度，应立即校准歌词位置
+         */
         override fun onSeekTo(position: Long) {
             sink?.onSeekTo(position)
         }
 
+        /**
+         * 官方标准：收到纯文本歌词时触发，应视为进入纯文本模式
+         */
         override fun onReceiveText(text: String?) {
             sink?.onPlainText(text)
         }
 
+        /**
+         * 官方标准：翻译显示开关变化，不保证当前歌词一定包含翻译内容
+         */
         override fun onDisplayTranslationChanged(isDisplayTranslation: Boolean) {
             sink?.onDisplayTranslationChanged(isDisplayTranslation)
         }
 
+        /**
+         * 官方标准：罗马音显示开关变化，不保证当前歌词一定包含罗马音内容
+         */
         override fun onDisplayRomaChanged(isDisplayRoma: Boolean) {
             sink?.onDisplayRomaChanged(isDisplayRoma)
         }
