@@ -35,11 +35,8 @@ data class Song(
 
     override fun normalize(): Song = deepCopy().apply {
         lyrics = lyrics?.mapNotNull { line ->
-            if (line.duration <= 0) line.duration = line.end - line.begin
-
             val isValid = line.begin >= 0
                     && line.begin < line.end
-                    && line.duration > 0
                     && !line.text.isNullOrBlank()
             if (isValid) line else null
         }?.normalizeSortByTime()

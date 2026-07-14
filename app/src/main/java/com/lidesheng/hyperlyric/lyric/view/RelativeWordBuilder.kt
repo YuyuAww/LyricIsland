@@ -22,8 +22,7 @@ internal class RelativeWordBuilder {
                 LyricWord(
                     text = text,
                     begin = timing.begin,
-                    end = timing.end,
-                    duration = timing.duration
+                    end = timing.end
                 )
             )
         }

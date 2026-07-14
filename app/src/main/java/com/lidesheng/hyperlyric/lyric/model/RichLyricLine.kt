@@ -16,9 +16,8 @@ import kotlinx.serialization.Serializable
 /**
  * 富歌词
  *
- * @property begin 开始时间
- * @property end 结束时间
- * @property duration 持续时间
+ * @property begin 开始时间 (毫秒)
+ * @property end 结束时间 (毫秒)
  * @property isAlignedRight 是否显示在右边
  * @property metadata 元数据
  * @property text 主文本
@@ -33,7 +32,6 @@ import kotlinx.serialization.Serializable
 data class RichLyricLine(
     override var begin: Long = 0,
     override var end: Long = 0,
-    override var duration: Long = 0,
     override var isAlignedRight: Boolean = false,
     override var metadata: LyricMetadata? = null,
     override var text: String? = null,
@@ -44,10 +42,6 @@ data class RichLyricLine(
     override var translationWords: List<LyricWord>? = null,
     override var roma: String? = null
 ) : IRichLyricLine, DeepCopyable<RichLyricLine>, Normalize<RichLyricLine> {
-
-    init {
-        if (duration == 0L && end > begin) duration = end - begin
-    }
 
     override fun deepCopy(): RichLyricLine = copy(
         words = words?.deepCopy(),

@@ -16,12 +16,13 @@ import com.lidesheng.hyperlyric.lyric.model.extensions.TimingNavigator
 data class LyricModel(
     val begin: Long = 0,
     val end: Long = 0,
-    val duration: Long = 0,
     val text: String,
     val words: List<WordModel>,
     val isAlignedRight: Boolean = false,
     var metadata: LyricMetadata? = null,
 ) {
+    val duration: Long
+        get() = end - begin
     var width: Float = 0f
         private set
 
@@ -66,7 +67,6 @@ internal fun emptyLyricModel(): LyricModel = LyricModel(
 internal fun LyricLine.createModel(): LyricModel = LyricModel(
     begin = begin,
     end = end,
-    duration = duration,
     text = text.orEmpty(),
     words = words?.toWordModels() ?: emptyList(),
     isAlignedRight = isAlignedRight,
@@ -84,7 +84,6 @@ private fun List<LyricWord>.toWordModels(): List<WordModel> {
         val model = WordModel(
             begin = word.begin,
             end = word.end,
-            duration = word.duration,
             text = word.text.orEmpty(),
             metadata = word.metadata
         )

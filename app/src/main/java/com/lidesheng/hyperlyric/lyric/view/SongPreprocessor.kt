@@ -51,7 +51,7 @@ internal class SongPreprocessor(private val placeholder: TitleSlot) {
     }
 
     private fun titleLine(end: Long, duration: Long, text: String) =
-        RichLyricLine(end = end, duration = duration, text = text).apply {
+        RichLyricLine(end = end, text = text).apply {
             metadata = lyricMetadataOf(KEY_TITLE_LINE to "true")
         }
 
