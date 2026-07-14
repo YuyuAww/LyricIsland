@@ -65,16 +65,10 @@ internal class LyricLineAssembler(
             isAlignedRight = source.isAlignedRight
 
             when {
-                !source.secondary.isNullOrBlank() || !source.secondaryWords.isNullOrEmpty() -> {
+                isNextLinePreview && !source.secondary.isNullOrBlank() -> {
                     text = source.secondary
-                    if (isNextLinePreview) {
-                        // 下一句只是预览文本，不能继承当前行时间轴或生成相对时间轴。
-                        words = emptyList()
-                        metadata = lyricMetadataOf(METADATA_NEXT_LINE_PREVIEW to "true")
-                    } else {
-                        words = wordBuilder.build(source, source.secondary, source.secondaryWords)
-                        generated = words !== source.secondaryWords
-                    }
+                    words = emptyList()
+                    metadata = lyricMetadataOf(METADATA_NEXT_LINE_PREVIEW to "true")
                 }
                 displayTranslation && (!source.translation.isNullOrBlank()
                         || !source.translationWords.isNullOrEmpty()) -> {
@@ -83,7 +77,7 @@ internal class LyricLineAssembler(
                     metadata = lyricMetadataOf("translation" to "true")
                     generated = words !== source.translationWords
                 }
-                displayRoma -> {
+                displayRoma && !source.roma.isNullOrBlank() -> {
                     text = source.roma
                     words = wordBuilder.build(source, source.roma, null)
                     metadata = lyricMetadataOf("roma" to "true")

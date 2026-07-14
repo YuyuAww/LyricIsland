@@ -126,6 +126,6 @@ object RootConstants {
     const val DEFAULT_HOOK_WORD_MOTION_LATIN_LIFT = 0.06f
     const val DEFAULT_HOOK_WORD_MOTION_LATIN_WAVE = 3.6f
 
-    const val DEFAULT_HOOK_DISPLAY_TRANSLATION = true
-    const val DEFAULT_HOOK_DISPLAY_ROMA = true
+    const val DEFAULT_HOOK_DISPLAY_TRANSLATION = false
+    const val DEFAULT_HOOK_DISPLAY_ROMA = false
 }
