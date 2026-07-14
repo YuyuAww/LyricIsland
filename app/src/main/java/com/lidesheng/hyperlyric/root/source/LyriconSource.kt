@@ -26,7 +26,15 @@ class LyriconSource : LyricSource {
 
     private fun Song.toLocalSong(): com.lidesheng.hyperlyric.lyric.model.Song {
         val jsonString = json.encodeToString(this)
-        return json.decodeFromString(jsonString)
+        val localSong = json.decodeFromString<com.lidesheng.hyperlyric.lyric.model.Song>(jsonString)
+        
+        localSong.lyrics?.forEach { line ->
+            if (line.roma.isNullOrBlank() && !line.secondary.isNullOrBlank()) {
+                line.roma = line.secondary
+            }
+        }
+        
+        return localSong
     }
 
     override val id = "lyricon"

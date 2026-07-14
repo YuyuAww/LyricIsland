@@ -14,6 +14,8 @@ object UIConstants {
     const val KEY_EXCLUDE_FROM_RECENTS = "key_exclude_from_recents"
     const val KEY_LOG_LEVEL = "key_log_level"
     const val KEY_LAST_SEEN_VERSION = "key_last_seen_version"
+    const val KEY_DISPLAY_TRANSLATION = "key_display_translation"
+    const val KEY_DISPLAY_ROMA = "key_display_roma"
 
     // ================= DEFAULTS =================
     const val DEFAULT_WORK_MODE = 0
@@ -25,4 +27,6 @@ object UIConstants {
     const val DEFAULT_FLOATING_NAV_BAR = false
     const val DEFAULT_EXCLUDE_FROM_RECENTS = false
     const val DEFAULT_LOG_LEVEL = 0 // 0=一般日志(I+W+E), 1=调试日志(D+I+W+E)
+    const val DEFAULT_DISPLAY_TRANSLATION = true
+    const val DEFAULT_DISPLAY_ROMA = true
 }

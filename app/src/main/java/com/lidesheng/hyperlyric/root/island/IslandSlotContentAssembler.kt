@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 
 import android.view.View
 
+import com.lidesheng.hyperlyric.common.UIConstants
 import com.lidesheng.hyperlyric.common.media.MediaMetadataHelper
 import com.lidesheng.hyperlyric.lyric.model.RichLyricLine
 import com.lidesheng.hyperlyric.lyric.model.lyricMetadataOf
@@ -43,6 +44,8 @@ internal object IslandSlotContentAssembler {
         force: Boolean = false
     ) {
         val nextLinePreview = isNextLinePreviewEnabled(config)
+        val displayTranslation = prefs.getBoolean(UIConstants.KEY_DISPLAY_TRANSLATION, UIConstants.DEFAULT_DISPLAY_TRANSLATION)
+        val displayRoma = prefs.getBoolean(UIConstants.KEY_DISPLAY_ROMA, UIConstants.DEFAULT_DISPLAY_ROMA)
         val signature = listOf(
             config.styleSignature,
             mode,
@@ -50,8 +53,8 @@ internal object IslandSlotContentAssembler {
             mediaInfo.artist,
             mediaInfo.album,
             mediaInfo.albumArt?.generationId ?: 0,
-            LyriconDataBridge.isDisplayTranslation,
-            LyriconDataBridge.isDisplayRoma
+            displayTranslation,
+            displayRoma
         ).joinToString("|")
 
         if (!force && lastStyleSignatures[view] == signature) return
@@ -74,13 +77,13 @@ internal object IslandSlotContentAssembler {
         )
         when (view) {
             is RichLyricLineView -> {
-                view.displayTranslation = LyriconDataBridge.isDisplayTranslation && !nextLinePreview
-                view.displayRoma = LyriconDataBridge.isDisplayRoma && !nextLinePreview
+                view.displayTranslation = displayTranslation && !nextLinePreview
+                view.displayRoma = displayRoma && !nextLinePreview
                 view.setStyle(style)
             }
             is SpaceGateRichLyricLineView -> {
-                view.displayTranslation = LyriconDataBridge.isDisplayTranslation && !nextLinePreview
-                view.displayRoma = LyriconDataBridge.isDisplayRoma && !nextLinePreview
+                view.displayTranslation = displayTranslation && !nextLinePreview
+                view.displayRoma = displayRoma && !nextLinePreview
                 view.setStyle(style)
             }
         }
