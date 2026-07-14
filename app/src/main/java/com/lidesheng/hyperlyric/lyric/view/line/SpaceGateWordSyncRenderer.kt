@@ -218,8 +218,8 @@ internal class SpaceGateWordSyncRenderer(private val view: SpaceGateLyricLineVie
     }
 
     private fun interpolateWordWidth(posMs: Long, word: WordModel): Float {
-        val duration = (word.end - word.begin).takeIf { it > 0 } ?: word.duration
-        if (duration <= 0L) return word.endPosition
+        val duration = word.duration.takeIf { it > 0 }
+        if (duration == null) return word.endPosition
         val progress = ((posMs - word.begin).toFloat() / duration.toFloat()).coerceIn(0f, 1f)
         return word.startPosition + (word.endPosition - word.startPosition) * progress
     }

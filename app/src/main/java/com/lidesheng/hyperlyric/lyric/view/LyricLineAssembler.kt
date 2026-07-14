@@ -41,7 +41,7 @@ internal class LyricLineAssembler(
 
         val generated = !hasOriginalWords && words !== source.words
         val line = LyricLine(
-            begin = source.begin, end = source.end, duration = source.duration,
+            begin = source.begin, end = source.end,
             isAlignedRight = source.isAlignedRight, metadata = source.metadata,
             text = source.text, words = words
         )
@@ -61,7 +61,7 @@ internal class LyricLineAssembler(
         var generated = false
         val isNextLinePreview = source.metadata?.getBoolean(METADATA_NEXT_LINE_PREVIEW) == true
         val line = LyricLine().apply {
-            begin = source.begin; end = source.end; duration = source.duration
+            begin = source.begin; end = source.end
             isAlignedRight = source.isAlignedRight
 
             when {

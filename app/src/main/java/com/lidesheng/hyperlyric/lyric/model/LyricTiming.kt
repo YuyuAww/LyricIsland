@@ -12,13 +12,11 @@ import kotlinx.serialization.Serializable
 /**
  * 歌词时间信息
  *
- * @property begin 开始时间
- * @property end 结束时间
- * @property duration 持续时间
+ * @property begin 开始时间 (毫秒)
+ * @property end 结束时间 (毫秒)
  */
 @Serializable
 data class LyricTiming(
     override var begin: Long,
-    override var end: Long,
-    override var duration: Long
+    override var end: Long
 ) : ILyricTiming

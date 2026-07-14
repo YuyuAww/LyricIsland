@@ -16,9 +16,8 @@ import kotlinx.serialization.Serializable
 /**
  * 歌词行
  *
- * @property begin 开始时间
- * @property end 结束时间
- * @property duration 持续时间
+ * @property begin 开始时间 (毫秒)
+ * @property end 结束时间 (毫秒)
  * @property isAlignedRight 是否渲染显示在右边
  * @property metadata 元数据
  * @property text 文本
@@ -28,16 +27,11 @@ import kotlinx.serialization.Serializable
 data class LyricLine(
     override var begin: Long = 0,
     override var end: Long = 0,
-    override var duration: Long = 0,
     override var isAlignedRight: Boolean = false,
     override var metadata: LyricMetadata? = null,
     override var text: String? = null,
     override var words: List<LyricWord>? = null,
 ) : ILyricLine, DeepCopyable<LyricLine>, Normalize<LyricLine> {
-
-    init {
-        if (duration == 0L && end > begin) duration = end - begin
-    }
 
     override fun deepCopy(): LyricLine = copy(
         words = words?.deepCopy()

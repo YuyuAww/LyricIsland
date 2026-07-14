@@ -319,7 +319,6 @@ internal object IslandSlotContentAssembler {
         return RichLyricLine(
             begin = begin,
             end = end,
-            duration = duration,
             isAlignedRight = isAlignedRight,
             metadata = lyricMetadataOf(
                 *(metadata?.entries?.map { it.key to it.value } ?: emptyList()).toTypedArray(),

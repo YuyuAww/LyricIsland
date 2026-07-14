@@ -17,7 +17,6 @@ import com.lidesheng.hyperlyric.lyric.model.interfaces.ILyricTiming
  *
  * @property begin 单词开始时间，单位毫秒
  * @property end 单词结束时间，单位毫秒
- * @property duration 单词持续时间，单位毫秒
  * @property text 单词文本内容
  * @property previous 前一个单词模型，可为 null
  * @property next 下一个单词模型，可为 null
@@ -32,7 +31,6 @@ import com.lidesheng.hyperlyric.lyric.model.interfaces.ILyricTiming
 data class WordModel(
     override var begin: Long,
     override var end: Long,
-    override var duration: Long,
     val text: String,
     val metadata: LyricMetadata? = null,
 ) : ILyricTiming {
